@@ -30,3 +30,10 @@ And clica em "Entrar"
 Then o sistema encontra uma usuária com o "CPF" informado
 And o sistema identifica que a "Senha" está incorreta
 And a usuária recebe a mensagem "Senha incorreta. Tente novamente."
+
+Scenario: Login de usuário mal sucedido por campo em branco
+Given a usuária "Paula Joana" está na tela de login
+When ela deixa de preencher pelo menos um dos campos
+And clica em "Entrar"
+Then o sistema reconhece a ausência de um dos campos
+And exibe "Preencha todos os campos antes de efetuar o login" para a usuária.
