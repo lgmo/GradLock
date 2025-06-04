@@ -28,4 +28,4 @@ When ele preenche o campo "Nome da Sala" com "E112"
 And ele preenche os outros campos do formulário
 And clica em "Cadastrar"
 Then o sistema reconhece que já existe uma sala com esse nome
-And uma mensagem de sucesso "Cadastro não realizado. Sala já existente!" é exibida na tela.
+And uma mensagem de sucesso "Cadastro não realizado. Sala já existente!" é exibida
