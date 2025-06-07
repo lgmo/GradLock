@@ -55,3 +55,4 @@ Scenario: Notificação de nova solicitação de reserva
   And uma notificação de nova solicitação é exibida
   When o "administrador" seleciona a notificação
   Then a página "solicitações" é aberta com a solicitação para a sala "c-303" selecionada
+
