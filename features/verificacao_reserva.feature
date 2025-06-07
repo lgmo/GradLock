@@ -56,3 +56,10 @@ Scenario: Notificação de nova solicitação de reserva
   When o "administrador" seleciona a notificação
   Then a página "solicitações" é aberta com a solicitação para a sala "c-303" selecionada
 
+Scenario: Notificação de nova solicitação de reserva ignorada
+  Given um "administrador" está logado no sistema
+  And a página "Início" está aberta
+  And um "aluno" solicita uma reserva para a sala "c-303"
+  And uma notificação de nova solicitação é exibida
+  When o "administrador" fecha a notificação
+  Then a página "Início" continua aberta
