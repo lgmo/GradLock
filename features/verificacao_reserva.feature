@@ -53,5 +53,5 @@ Scenario: Notificação de nova solicitação de reserva
   Given um "administrador" está logado no sistema
   And um "aluno" solicita uma reserva para a sala "c-303"
   And uma notificação de nova solicitação é exibida
-  When o "administrador" acessa a página "solicitações"
-  Then a solicitação para a sala "c-303" é exibida na lista de solicitações pendentes
+  When o "administrador" seleciona a notificação
+  Then a página "solicitações" é aberta com a solicitação para a sala "c-303" selecionada
