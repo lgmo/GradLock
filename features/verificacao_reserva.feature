@@ -47,3 +47,10 @@ Scenario: Verificação de reservas expiradas
     When o usuário seleciona a opção "verificar reservas expiradas"
     Then uma lista de reservas expiradas é exibida
     And cada reserva expiradas exibe a sala, o horário e o status "expirada"
+
+Scenario: Notificação de nova solicitação de reserva
+  Given um "administrador" está logado no sistema
+  And um "aluno" solicita uma reserva para a sala "c-303"
+  And uma notificação de nova solicitação é exibida
+  When o "administrador" acessa a página "solicitações"
+  Then a solicitação para a sala "c-303" é exibida na lista de solicitações pendentes
