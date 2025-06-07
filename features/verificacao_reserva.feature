@@ -14,6 +14,7 @@ Scenario: Um administrador confirma uma reserva
   And as opções "confirmar" e "negar" são exibidas
   When o usuário seleciona "confirmar"
   Then a sala "a-102" é reservada
+  And a solicitação para a sala "a-102" é marcada como confirmada
 
 Scenario: Um administrador nega uma reserva
   Given um "administrador" está logado no sistema
