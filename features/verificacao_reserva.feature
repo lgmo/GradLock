@@ -40,3 +40,10 @@ Scenario: Lista de solicitações pendentes vazia
   And não há solicitações de reserva pendentes
   When o usuário seleciona a página "solicitações"
   Then uma mensagem indicando "Nenhuma solicitação pendente" é exibida
+
+Scenario: Verificação de reservas expiradas
+  Given um "administrador" está logado no sistema
+    And a página "solicitações" está aberta
+    When o usuário seleciona a opção "verificar reservas expiradas"
+    Then uma lista de reservas expiradas é exibida
+    And cada reserva expiradas exibe a sala, o horário e o status "expirada"
