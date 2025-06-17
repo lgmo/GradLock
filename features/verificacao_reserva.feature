@@ -9,30 +9,30 @@ Scenario: Um administrador busca as solicitações pendentes.
 Scenario: Um administrador confirma uma reserva
   Given um "administrador" está logado no sistema
   And a página "solicitações" está aberta
-  When o usuário seleciona a solicitação para a sala "a-102"
+  When o usuário seleciona a solicitação para a sala "A102"
   Then uma descrição sobre a solicitação é exibida
   And as opções "confirmar" e "negar" são exibidas
   When o usuário seleciona "confirmar"
-  Then a sala "a-102" é reservada
-  And a solicitação para a sala "a-102" é marcada como confirmada
+  Then a sala "A102" é reservada
+  And a solicitação para a sala "A102" é marcada como confirmada
 
 Scenario: Um administrador nega uma reserva
   Given um "administrador" está logado no sistema
   And a página "solicitações" está aberta
-  When o usuário seleciona a solicitação para a sala "b-205"
+  When o usuário seleciona a solicitação para a sala "B205"
   Then uma descrição sobre a solicitação é exibida
   And as opções "confirmar" e "negar" são exibidas
   When o usuário seleciona "negar"
-  Then a solicitação para a sala "b-205" é rejeitada
-  And a sala "b-205" permanece disponível para o horário solicitado
+  Then a solicitação para a sala "B205" é rejeitada
+  And a sala "B205" permanece disponível para o horário solicitado
 
 Scenario: Notificação de confirmação para o solicitante
-  Given uma solicitação de reserva para a sala "d-410" foi confirmada por um administrador
+  Given uma solicitação de reserva para a sala "D410" foi confirmada por um administrador
   When o status da reserva é atualizado para "confirmada"
   Then o usuário que solicitou a reserva recebe uma notificação informando a confirmação
 
 Scenario: Notificação de negação para o solicitante
-  Given uma solicitação de reserva para a sala "e-115" foi negada por um administrador
+  Given uma solicitação de reserva para a sala "E115" foi negada por um administrador
   When o status da reserva é atualizado para "negada"
   Then o usuário que solicitou a reserva recebe uma notificação informando a negação
 
@@ -51,7 +51,7 @@ Scenario: Verificação de reservas expiradas
 
 Scenario: Notificação de nova solicitação de reserva
   Given um "administrador" está logado no sistema
-  And um "aluno" solicita uma reserva para a sala "c-303"
+  And um "aluno" solicita uma reserva para a sala "C303"
   And uma notificação de nova solicitação é exibida
   When o "administrador" seleciona a notificação
-  Then a página "solicitações" é aberta com a solicitação para a sala "c-303" selecionada
+  Then a página "solicitações" é aberta com a solicitação para a sala "C303" selecionada
