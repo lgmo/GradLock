@@ -1,13 +1,13 @@
 feature: Verificação de reservas (confirmação ou negação)
 
 Scenario: Um administrador busca as solicitações pendentes.
-  Given um "administrador" está logado no sistema
+  Given o "administrador" "Breno" está logado no sistema
   And a página "início" está aberta
   When o usuário seleciona a página "solicitações"
   Then uma lista com todas as solicitações pendentes é exibida
 
 Scenario: Um administrador confirma uma reserva
-  Given um "administrador" está logado no sistema
+  Given o "administrador" "Breno" está logado no sistema
   And a página "solicitações" está aberta
   When o usuário seleciona a solicitação para a sala "A102"
   Then uma descrição sobre a solicitação é exibida
@@ -17,7 +17,7 @@ Scenario: Um administrador confirma uma reserva
   And a solicitação para a sala "A102" é marcada como confirmada
 
 Scenario: Um administrador nega uma reserva
-  Given um "administrador" está logado no sistema
+  Given o "administrador" "Breno" está logado no sistema
   And a página "solicitações" está aberta
   When o usuário seleciona a solicitação para a sala "B205"
   Then uma descrição sobre a solicitação é exibida
@@ -37,20 +37,20 @@ Scenario: Notificação de negação para o solicitante
   Then o usuário que solicitou a reserva recebe uma notificação informando a negação
 
 Scenario: Lista de solicitações pendentes vazia
-  Given um "administrador" está logado no sistema
+  Given o "administrador" "Breno" está logado no sistema
   And não há solicitações de reserva pendentes
   When o usuário seleciona a página "solicitações"
   Then uma mensagem indicando "Nenhuma solicitação pendente" é exibida
 
 Scenario: Verificação de reservas expiradas
-  Given um "administrador" está logado no sistema
+  Given o "administrador" "Breno" está logado no sistema
     And a página "solicitações" está aberta
     When o usuário seleciona a opção "verificar reservas expiradas"
     Then uma lista de reservas expiradas é exibida
     And cada reserva expiradas exibe a sala, o horário e o status "expirada"
 
 Scenario: Notificação de nova solicitação de reserva
-  Given um "administrador" está logado no sistema
+  Given o "administrador" "Breno" está logado no sistema
   And um "aluno" solicita uma reserva para a sala "C303"
   And uma notificação de nova solicitação é exibida
   When o "administrador" seleciona a notificação
