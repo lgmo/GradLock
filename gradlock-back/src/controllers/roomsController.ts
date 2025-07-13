@@ -155,4 +155,124 @@ export class RoomsController {
       });
     }
   }
+
+  static async updateRoom(req: Request, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+      const { name, description, capacity, hasComputers, hasProjector } = req.body;
+      const roomId = parseInt(id);
+
+      // Validação do ID
+      if (isNaN(roomId)) {
+        res.status(400).json({
+          success: false,
+          message: 'ID da sala deve ser um número válido'
+        });
+        return;
+      }
+
+      // Verificar se a sala existe
+      const existingRoom = await prisma.room.findUnique({
+        where: { id: roomId }
+      });
+
+      if (!existingRoom) {
+        res.status(404).json({
+          success: false,
+          message: 'Sala não encontrada'
+        });
+        return;
+      }
+
+      // Preparar dados para atualização (apenas campos fornecidos)
+      const updateData: any = {};
+
+      if (name !== undefined) {
+        if (!name.trim()) {
+          res.status(400).json({
+            success: false,
+            message: 'Nome da sala não pode ser vazio'
+          });
+          return;
+        }
+
+        // Verificar se o novo nome já existe em outra sala
+        const roomWithSameName = await prisma.room.findFirst({
+          where: { 
+            name: name.trim(),
+            NOT: { id: roomId }
+          }
+        });
+
+        if (roomWithSameName) {
+          res.status(409).json({
+            success: false,
+            message: 'Já existe uma sala com esse nome'
+          });
+          return;
+        }
+
+        updateData.name = name.trim();
+      }
+
+      if (description !== undefined) {
+        if (!description.trim()) {
+          res.status(400).json({
+            success: false,
+            message: 'Descrição da sala não pode ser vazia'
+          });
+          return;
+        }
+        updateData.description = description.trim();
+      }
+
+      if (capacity !== undefined) {
+        const roomCapacity = parseInt(capacity);
+        if (isNaN(roomCapacity) || roomCapacity <= 0) {
+          res.status(400).json({
+            success: false,
+            message: 'Capacidade deve ser um número positivo'
+          });
+          return;
+        }
+        updateData.capacity = roomCapacity;
+      }
+
+      if (hasComputers !== undefined) {
+        updateData.hasComputers = Boolean(hasComputers);
+      }
+
+      if (hasProjector !== undefined) {
+        updateData.hasProjector = Boolean(hasProjector);
+      }
+
+      // Se não há dados para atualizar
+      if (Object.keys(updateData).length === 0) {
+        res.status(400).json({
+          success: false,
+          message: 'Nenhum dado fornecido para atualização'
+        });
+        return;
+      }
+
+      // Atualizar a sala
+      const updatedRoom = await prisma.room.update({
+        where: { id: roomId },
+        data: updateData
+      });
+
+      res.status(200).json({
+        success: true,
+        message: 'Sala atualizada com sucesso',
+        data: updatedRoom
+      });
+    } catch (error) {
+      console.error('Erro ao atualizar sala:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Erro interno do servidor ao atualizar sala',
+        error: process.env.NODE_ENV === 'development' ? error : undefined
+      });
+    }
+  }
 }

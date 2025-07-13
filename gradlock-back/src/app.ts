@@ -13,7 +13,7 @@ app.use(express.json());
 const swaggerDocs = swaggerJSDoc(swaggerConfig);
 
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
-app.use('/route', apiRouter);
+app.use('/api', apiRouter);
 
 // Middleware de tratamento de erros com tipagem do Express
 const errorHandler: ErrorRequestHandler = (error, _req, res, _next) => {

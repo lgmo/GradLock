@@ -7,5 +7,6 @@ const apiRouter = express.Router();
 apiRouter.get('/rooms', RoomsController.getAllRooms);
 apiRouter.get('/rooms/:id', RoomsController.getRoomById);
 apiRouter.post('/rooms', RoomsController.createRoom);
+apiRouter.put('/rooms/:id', RoomsController.updateRoom);
 
-export default apiRouter; 
+export default apiRouter;
