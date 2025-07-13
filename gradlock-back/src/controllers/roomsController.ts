@@ -275,4 +275,81 @@ export class RoomsController {
       });
     }
   }
+
+  static async deleteRoom(req: Request, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+      const roomId = parseInt(id);
+
+      // Validação do ID
+      if (isNaN(roomId)) {
+        res.status(400).json({
+          success: false,
+          message: 'ID da sala deve ser um número válido'
+        });
+        return;
+      }
+
+      // Verificar se a sala existe
+      const existingRoom = await prisma.room.findUnique({
+        where: { id: roomId },
+        include: {
+          reservations: true
+        }
+      });
+
+      if (!existingRoom) {
+        res.status(404).json({
+          success: false,
+          message: 'Sala não encontrada'
+        });
+        return;
+      }
+
+      // Verificar se há reservas ativas para esta sala
+      const activeReservations = await prisma.reservation.findMany({
+        where: {
+          roomId: roomId,
+          date: {
+            gte: new Date() // Reservas futuras ou de hoje
+          }
+        }
+      });
+
+      if (activeReservations.length > 0) {
+        res.status(409).json({
+          success: false,
+          message: 'Não é possível deletar a sala. Existem reservas ativas ou futuras para esta sala',
+          data: {
+            activeReservations: activeReservations.length
+          }
+        });
+        return;
+      }
+
+      // Deletar a sala (as reservas passadas serão deletadas em cascata)
+      await prisma.room.delete({
+        where: { id: roomId }
+      });
+
+      res.status(200).json({
+        success: true,
+        message: 'Sala deletada com sucesso',
+        data: {
+          deletedRoom: {
+            id: existingRoom.id,
+            name: existingRoom.name,
+            description: existingRoom.description
+          }
+        }
+      });
+    } catch (error) {
+      console.error('Erro ao deletar sala:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Erro interno do servidor ao deletar sala',
+        error: process.env.NODE_ENV === 'development' ? error : undefined
+      });
+    }
+  }
 }
