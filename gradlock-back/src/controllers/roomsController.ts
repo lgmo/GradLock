@@ -94,4 +94,65 @@ export class RoomsController {
       });
     }
   }
+  static async createRoom(req: Request, res: Response): Promise<void> {
+    try {
+      const { name, description, capacity, hasComputers, hasProjector } = req.body;
+
+      // Validações de entrada
+      if (!name || !description || !capacity) {
+        res.status(400).json({
+          success: false,
+          message: 'Campos obrigatórios: name, description, capacity'
+        });
+        return;
+      }
+
+      // Validação do tipo de capacidade
+      const roomCapacity = parseInt(capacity);
+      if (isNaN(roomCapacity) || roomCapacity <= 0) {
+        res.status(400).json({
+          success: false,
+          message: 'Capacidade deve ser um número positivo'
+        });
+        return;
+      }
+
+      // Verificar se a sala já existe
+      const existingRoom = await prisma.room.findUnique({
+        where: { name: name.trim() }
+      });
+
+      if (existingRoom) {
+        res.status(409).json({
+          success: false,
+          message: 'Cadastro não realizado. Sala já existente!'
+        });
+        return;
+      }
+
+      // Criar a nova sala
+      const newRoom = await prisma.room.create({
+        data: {
+          name: name.trim(),
+          description: description.trim(),
+          capacity: roomCapacity,
+          hasComputers: Boolean(hasComputers),
+          hasProjector: Boolean(hasProjector)
+        }
+      });
+
+      res.status(201).json({
+        success: true,
+        message: 'Cadastro realizado com sucesso!',
+        data: newRoom
+      });
+    } catch (error) {
+      console.error('Erro ao criar sala:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Erro interno do servidor ao criar sala',
+        error: process.env.NODE_ENV === 'development' ? error : undefined
+      });
+    }
+  }
 }
