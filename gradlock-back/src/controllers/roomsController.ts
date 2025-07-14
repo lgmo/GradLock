@@ -102,7 +102,7 @@ export class RoomsController {
       if (!name || !description || !capacity) {
         res.status(400).json({
           success: false,
-          message: 'Campos obrigatórios: name, description, capacity'
+          message: 'Cadastro não realizado. Todos os campos devem ser preenchidos!'
         });
         return;
       }
