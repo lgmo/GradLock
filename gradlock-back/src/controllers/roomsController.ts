@@ -102,7 +102,7 @@ export class RoomsController {
       if (!name || !description || !capacity) {
         res.status(400).json({
           success: false,
-          message: 'Campos obrigatórios: name, description, capacity'
+          message: 'Cadastro não realizado. Todos os campos devem ser preenchidos!'
         });
         return;
       }
@@ -207,7 +207,7 @@ export class RoomsController {
         if (roomWithSameName) {
           res.status(409).json({
             success: false,
-            message: 'Já existe uma sala com esse nome'
+            message: 'Falha na edição. Esse nome está indisponível'
           });
           return;
         }
@@ -231,7 +231,7 @@ export class RoomsController {
         if (isNaN(roomCapacity) || roomCapacity <= 0) {
           res.status(400).json({
             success: false,
-            message: 'Capacidade deve ser um número positivo'
+            message: 'Falha na edição. A capacidade deve ser um número positivo!'
           });
           return;
         }
@@ -259,7 +259,7 @@ export class RoomsController {
       const updatedRoom = await prisma.room.update({
         where: { id: roomId },
         data: updateData
-      });
+      }); 
 
       res.status(200).json({
         success: true,
