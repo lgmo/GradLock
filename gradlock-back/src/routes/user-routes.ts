@@ -9,6 +9,8 @@ const router = express.Router();
  * @swagger
  * /api/users:
  *   post:
+ *     tags:
+ *       - Users
  *     summary: Registra usuário
  *     requestBody:
  *       required: true

@@ -10,6 +10,8 @@ const router = express.Router();
  * /api/auth/login:
  *   post:
  *     summary: Login de usuário
+ *     tags:
+ *       - Auth
  *     requestBody:
  *       required: true
  *       content:
@@ -48,6 +50,8 @@ router.post('/login', validateRequest({ bodySchema: authCredentialsSchema }), au
  * /api/auth/refresh-token:
  *   post:
  *     summary: Refresh do token de acesso
+ *     tags:
+ *       - Auth
  *     requestBody:
  *       required: true
  *       content:

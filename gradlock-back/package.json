@@ -7,7 +7,7 @@
     "start": "npm run build && node dist/server.js",
     "dev": "prisma generate && nodemon",
     "dev:watch": "nodemon",
-    "seed": "ts-node prisma/seed.ts",
+    "seed": "ts-node prisma/seeds/seed-test.ts",
     "postinstall": "prisma generate",
     "lint": "eslint 'src/**/*.{ts,js}'",
     "format": "prettier --write 'src/**/*.{ts,js,json,md}'",

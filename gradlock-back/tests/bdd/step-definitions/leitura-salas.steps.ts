@@ -1,20 +1,24 @@
 import { defineFeature, loadFeature } from 'jest-cucumber';
+import bcrypt from 'bcrypt';
 import request from 'supertest';
 import app from '../../../src/app';
 import prisma from '../../../src/config/prismaClient';
+import { securityConfig } from '../../../src/config/baseConfig';
+import { UserType } from '../../../generated/prisma';
 
 const feature = loadFeature('../features/leitura_salas.feature');
 
-defineFeature(feature, test => {
+defineFeature(feature, (test) => {
   let response: any;
   let roomId: number;
+  let accessToekn: any;
 
   beforeEach(async () => {
     // Limpar dados antes de cada teste
     await prisma.reservation.deleteMany();
     await prisma.room.deleteMany();
     await prisma.user.deleteMany();
-    
+
     // Reset variables
     response = null;
     roomId = 0;
@@ -30,36 +34,48 @@ defineFeature(feature, test => {
             description: 'Laboratório 1',
             capacity: 30,
             hasComputers: true,
-            hasProjector: false
+            hasProjector: false,
           },
           {
             name: 'GRAD 2',
             description: 'Laboratório 2',
             capacity: 25,
             hasComputers: false,
-            hasProjector: true
+            hasProjector: true,
           },
           {
             name: 'GRAD 3',
             description: 'Laboratório 3',
             capacity: 40,
             hasComputers: true,
-            hasProjector: true
-          }
-        ]
+            hasProjector: true,
+          },
+        ],
       });
     });
 
     when('o usuário solicita a lista de todas as salas', async () => {
-      response = await request(app)
-        .get('/api/rooms');
+      const password = '041102';
+      const hashedPassword = await bcrypt.hash(password, securityConfig.saltRounds);
+      const cpf = '34567890123';
+      await prisma.user.create({
+        data: {
+          name: 'Pedro dias',
+          cpf: cpf, // Sem formatação para armazenamento
+          password: hashedPassword,
+          userType: UserType.STUDENT,
+        },
+      });
+      response = await request(app).post('/api/auth/login').send({ cpf: cpf, password: password });
+      const accessToken = response.body.accessToken;
+      response = await request(app).get('/api/rooms').set('authorization', `Bearer ${accessToken}`);
     });
 
     then('o sistema retorna todas as salas ordenadas por nome', () => {
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
       expect(response.body.data).toHaveLength(3);
-      
+
       // Verificar ordenação por nome
       expect(response.body.data[0].name).toBe('GRAD 1');
       expect(response.body.data[1].name).toBe('GRAD 2');
@@ -81,8 +97,20 @@ defineFeature(feature, test => {
     });
 
     when('o usuário solicita a lista de todas as salas', async () => {
-      response = await request(app)
-        .get('/api/rooms');
+      const password = '041102';
+      const hashedPassword = await bcrypt.hash(password, securityConfig.saltRounds);
+      const cpf = '34567890123';
+      await prisma.user.create({
+        data: {
+          name: 'Pedro dias',
+          cpf: cpf, // Sem formatação para armazenamento
+          password: hashedPassword,
+          userType: UserType.TEACHER,
+        },
+      });
+      response = await request(app).post('/api/auth/login').send({ cpf: cpf, password: password });
+      const accessToken = response.body.accessToken;
+      response = await request(app).get('/api/rooms').set('authorization', `Bearer ${accessToken}`);
     });
 
     then('o sistema retorna uma lista vazia', () => {
@@ -108,15 +136,29 @@ defineFeature(feature, test => {
           description: 'Laboratório 1',
           capacity: 30,
           hasComputers: true,
-          hasProjector: false
-        }
+          hasProjector: false,
+        },
       });
       roomId = room.id;
     });
 
     when('o usuário solicita a sala com ID "1"', async () => {
+      const password = '041102';
+      const hashedPassword = await bcrypt.hash(password, securityConfig.saltRounds);
+      const cpf = '34567890123';
+      await prisma.user.create({
+        data: {
+          name: 'Pedro dias',
+          cpf: cpf, // Sem formatação para armazenamento
+          password: hashedPassword,
+          userType: UserType.STUDENT,
+        },
+      });
+      response = await request(app).post('/api/auth/login').send({ cpf: cpf, password: password });
+      const accessToken = response.body.accessToken;
       response = await request(app)
-        .get(`/api/rooms/${roomId}`);
+        .get(`/api/rooms/${roomId}`)
+        .set('authorization', `Bearer ${accessToken}`);
     });
 
     then('o sistema retorna os dados da sala', () => {
@@ -144,8 +186,22 @@ defineFeature(feature, test => {
     });
 
     when('o usuário solicita a sala com ID "999"', async () => {
+      const password = '041102';
+      const hashedPassword = await bcrypt.hash(password, securityConfig.saltRounds);
+      const cpf = '34567890123';
+      await prisma.user.create({
+        data: {
+          name: 'Pedro dias',
+          cpf: cpf, // Sem formatação para armazenamento
+          password: hashedPassword,
+          userType: UserType.TEACHER,
+        },
+      });
+      response = await request(app).post('/api/auth/login').send({ cpf: cpf, password: password });
+      const accessToken = response.body.accessToken;
       response = await request(app)
-        .get('/api/rooms/999');
+        .get('/api/rooms/999')
+        .set('authorization', `Bearer ${accessToken}`);
     });
 
     then('o sistema retorna um erro', () => {
@@ -164,8 +220,22 @@ defineFeature(feature, test => {
     });
 
     when('o usuário solicita a sala com ID "abc"', async () => {
+      const password = '041102';
+      const hashedPassword = await bcrypt.hash(password, securityConfig.saltRounds);
+      const cpf = '34567890123';
+      await prisma.user.create({
+        data: {
+          name: 'Pedro dias',
+          cpf: cpf, // Sem formatação para armazenamento
+          password: hashedPassword,
+          userType: UserType.ADMIN,
+        },
+      });
+      response = await request(app).post('/api/auth/login').send({ cpf: cpf, password: password });
+      const accessToken = response.body.accessToken;
       response = await request(app)
-        .get('/api/rooms/abc');
+        .get('/api/rooms/abc')
+        .set('authorization', `Bearer ${accessToken}`);
     });
 
     then('o sistema retorna um erro', () => {

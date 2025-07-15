@@ -1,28 +1,44 @@
 import { defineFeature, loadFeature } from 'jest-cucumber';
+import bcrypt from 'bcrypt';
 import request from 'supertest';
 import app from '../../../src/app';
 import prisma from '../../../src/config/prismaClient';
+import { securityConfig } from '../../../src/config/baseConfig';
+import { UserType } from '../../../generated/prisma';
 
 const feature = loadFeature('../features/delecao_salas.feature');
 
-defineFeature(feature, test => {
+defineFeature(feature, (test) => {
   let response: any;
   let roomId: number;
+  let accessToken: any;
 
   beforeEach(async () => {
     // Limpar dados antes de cada teste
     await prisma.reservation.deleteMany();
     await prisma.room.deleteMany();
     await prisma.user.deleteMany();
-    
+
     // Reset variables
     response = null;
     roomId = 0;
   });
 
   test('Deleção de sala com sucesso', ({ given, when, then, and }) => {
-    given('o administrador "Pedro Dias"', () => {
-      // Contexto do administrador
+    given('o administrador "Pedro Dias"', async () => {
+      const password = '041102';
+      const hashedPassword = await bcrypt.hash(password, securityConfig.saltRounds);
+      const cpf = '34567890123';
+      await prisma.user.create({
+        data: {
+          name: 'Pedro dias',
+          cpf: cpf, // Sem formatação para armazenamento
+          password: hashedPassword,
+          userType: UserType.ADMIN,
+        },
+      });
+      response = await request(app).post('/api/auth/login').send({ cpf: cpf, password: password });
+      accessToken = response.body.accessToken;
     });
 
     and('existe uma sala com ID "1" no sistema', async () => {
@@ -32,8 +48,8 @@ defineFeature(feature, test => {
           description: 'Laboratório 1',
           capacity: 30,
           hasComputers: true,
-          hasProjector: false
-        }
+          hasProjector: false,
+        },
       });
       roomId = room.id;
     });
@@ -44,16 +60,17 @@ defineFeature(feature, test => {
 
     when('ele solicita a deleção da sala com ID "1"', async () => {
       response = await request(app)
-        .delete(`/api/rooms/${roomId}`);
+        .delete(`/api/rooms/${roomId}`)
+        .set('authorization', `Bearer ${accessToken}`);
     });
 
     then('o sistema deleta a sala com sucesso', async () => {
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
-      
+
       // Verificar se foi deletado do banco
       const roomInDb = await prisma.room.findUnique({
-        where: { id: roomId }
+        where: { id: roomId },
       });
       expect(roomInDb).toBeNull();
     });
@@ -70,13 +87,26 @@ defineFeature(feature, test => {
   });
 
   test('Erro na deleção por ID inválido', ({ given, when, then, and }) => {
-    given('o administrador "Pedro Dias"', () => {
-      // Contexto do administrador
+    given('o administrador "Pedro Dias"', async () => {
+      const password = '041102';
+      const hashedPassword = await bcrypt.hash(password, securityConfig.saltRounds);
+      const cpf = '34567890123';
+      await prisma.user.create({
+        data: {
+          name: 'Pedro dias',
+          cpf: cpf, // Sem formatação para armazenamento
+          password: hashedPassword,
+          userType: UserType.ADMIN,
+        },
+      });
+      response = await request(app).post('/api/auth/login').send({ cpf: cpf, password: password });
+      accessToken = response.body.accessToken;
     });
 
     when('ele solicita a deleção da sala com ID "abc"', async () => {
       response = await request(app)
-        .delete('/api/rooms/abc');
+        .delete('/api/rooms/abc')
+        .set('authorization', `Bearer ${accessToken}`);
     });
 
     then('o sistema reconhece que o ID é inválido', () => {
@@ -90,13 +120,26 @@ defineFeature(feature, test => {
   });
 
   test('Erro na deleção por sala inexistente', ({ given, when, then, and }) => {
-    given('o administrador "Pedro Dias"', () => {
-      // Contexto do administrador
+    given('o administrador "Pedro Dias"', async () => {
+      const password = '041102';
+      const hashedPassword = await bcrypt.hash(password, securityConfig.saltRounds);
+      const cpf = '34567890123';
+      await prisma.user.create({
+        data: {
+          name: 'Pedro dias',
+          cpf: cpf, // Sem formatação para armazenamento
+          password: hashedPassword,
+          userType: UserType.ADMIN,
+        },
+      });
+      response = await request(app).post('/api/auth/login').send({ cpf: cpf, password: password });
+      accessToken = response.body.accessToken;
     });
 
     when('ele solicita a deleção da sala com ID "999"', async () => {
       response = await request(app)
-        .delete('/api/rooms/999');
+        .delete('/api/rooms/999')
+        .set('authorization', `Bearer ${accessToken}`);
     });
 
     then('o sistema reconhece que a sala não existe', () => {
@@ -110,8 +153,20 @@ defineFeature(feature, test => {
   });
 
   test('Erro na deleção por reservas ativas', ({ given, when, then, and }) => {
-    given('o administrador "Pedro Dias"', () => {
-      // Contexto do administrador
+    given('o administrador "Pedro Dias"', async () => {
+      const password = '041102';
+      const hashedPassword = await bcrypt.hash(password, securityConfig.saltRounds);
+      const cpf = '34567890123';
+      await prisma.user.create({
+        data: {
+          name: 'Pedro dias',
+          cpf: cpf, // Sem formatação para armazenamento
+          password: hashedPassword,
+          userType: UserType.ADMIN,
+        },
+      });
+      response = await request(app).post('/api/auth/login').send({ cpf: cpf, password: password });
+      accessToken = response.body.accessToken;
     });
 
     and('existe uma sala com ID "1" no sistema', async () => {
@@ -121,8 +176,8 @@ defineFeature(feature, test => {
           description: 'Laboratório 1',
           capacity: 30,
           hasComputers: true,
-          hasProjector: false
-        }
+          hasProjector: false,
+        },
       });
       roomId = room.id;
     });
@@ -134,8 +189,8 @@ defineFeature(feature, test => {
           cpf: '12345678901',
           name: 'João Silva',
           password: 'senha123',
-          userType: 'STUDENT'
-        }
+          userType: 'STUDENT',
+        },
       });
 
       // Criar uma reserva futura
@@ -149,14 +204,15 @@ defineFeature(feature, test => {
           endTime: '11:00',
           reason: 'Aula de laboratório',
           userId: user.id,
-          roomId: roomId
-        }
+          roomId: roomId,
+        },
       });
     });
 
     when('ele solicita a deleção da sala com ID "1"', async () => {
       response = await request(app)
-        .delete(`/api/rooms/${roomId}`);
+        .delete(`/api/rooms/${roomId}`)
+        .set('authorization', `Bearer ${accessToken}`);
     });
 
     then('o sistema não permite a deleção', () => {
@@ -164,9 +220,14 @@ defineFeature(feature, test => {
       expect(response.body.success).toBe(false);
     });
 
-    and('a mensagem "Não é possível deletar a sala. Existem reservas ativas ou futuras para esta sala" é exibida', () => {
-      expect(response.body.message).toBe('Não é possível deletar a sala. Existem reservas ativas ou futuras para esta sala');
-    });
+    and(
+      'a mensagem "Não é possível deletar a sala. Existem reservas ativas ou futuras para esta sala" é exibida',
+      () => {
+        expect(response.body.message).toBe(
+          'Não é possível deletar a sala. Existem reservas ativas ou futuras para esta sala',
+        );
+      },
+    );
 
     and('o número de reservas ativas é informado', () => {
       expect(response.body.data.activeReservations).toBe(1);
