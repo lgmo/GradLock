@@ -44,6 +44,7 @@ const errorHandler: ErrorRequestHandler = (error, _req, res, _next) => {
   res.status(errorToClient.statusCode).json({
     status: errorToClient.status,
     message: errorToClient.message,
+    success: false,
   });
 };
 

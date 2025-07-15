@@ -5,7 +5,7 @@ import { securityConfig } from '../config/baseConfig';
 import { JwtPayload } from '../types/auth';
 import { UserAuth } from '../types/user';
 import prisma from '../config/prismaClient';
-import { InvalidCredentialsError } from '../errors/httpErrors';
+import { InvalidCredentialsError, NotFoundError } from '../errors/httpErrors';
 import { AuthTokens } from '../types/auth';
 
 function generateAccessToken(userId: number, userType: UserType): string {
@@ -32,13 +32,13 @@ export const authService = {
     });
 
     if (!existentUser) {
-      throw new InvalidCredentialsError('Cpf ou password inválidos.');
+      throw new NotFoundError(`Usuário com cpf ${user.cpf} não encontrado.`);
     }
 
     const isPasswordCorrect = await bcrypt.compare(user.password, existentUser.password);
 
     if (!isPasswordCorrect) {
-      throw new InvalidCredentialsError('cpf ou password inválidos.');
+      throw new InvalidCredentialsError('Password inválido.');
     }
 
     return {
@@ -50,7 +50,7 @@ export const authService = {
     let decoded;
     try {
       decoded = jwt.verify(refreshToken, securityConfig.jwtSecret) as JwtPayload;
-    } catch (error) {
+    } catch {
       throw new InvalidCredentialsError('refreshToken inválido.');
     }
     const existentUser = await prisma.user.findUnique({

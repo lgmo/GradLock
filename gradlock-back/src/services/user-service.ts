@@ -1,6 +1,6 @@
 import bcrypt from 'bcrypt';
 import prisma from '../config/prismaClient';
-import { AlreadyExistsError, NotFoundError } from '../errors/httpErrors';
+import { AlreadyExistsError } from '../errors/httpErrors';
 import { User, UserRequest } from '../types/user';
 import { securityConfig } from '../config/baseConfig';
 
@@ -11,18 +11,19 @@ const userService = {
           OR: [{ cpf: user.cpf }, { enrollment: user.enrollment }],
         }
       : { cpf: user.cpf };
+    const selectFilter = {
+      id: true,
+      name: true,
+      cpf: true,
+      enrollment: true,
+      course: true,
+      userType: true,
+      createdAt: true,
+      updatedAt: true,
+    };
     let existentUser = await prisma.user.findFirst({
       where: clause,
-      select: {
-        id: true,
-        name: true,
-        cpf: true,
-        enrollment: true,
-        course: true,
-        userType: true,
-        createdAt: true,
-        updatedAt: true,
-      },
+      select: selectFilter,
     });
 
     if (existentUser !== null) {
@@ -46,11 +47,12 @@ const userService = {
       });
     }
 
-    let { password, ...newUser } = await prisma.user.create({
+    const newUser = await prisma.user.create({
       data: {
         ...user,
         password: await bcrypt.hash(user.password, securityConfig.saltRounds),
       },
+      select: selectFilter,
     });
 
     return newUser;

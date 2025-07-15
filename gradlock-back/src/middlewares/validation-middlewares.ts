@@ -8,9 +8,9 @@ export const validateRequest =
     querySchema,
     pathSchema,
   }: {
-    bodySchema?: z.ZodSchema<any>;
-    querySchema?: z.ZodSchema<any>;
-    pathSchema?: z.ZodSchema<any>;
+    bodySchema?: z.ZodSchema;
+    querySchema?: z.ZodSchema;
+    pathSchema?: z.ZodSchema;
   }): RequestHandler =>
   (req, _res, next) => {
     try {
@@ -35,7 +35,7 @@ export const validateRequest =
           })
           .join('; ');
 
-        error = new ValidationError(errorMessages);
+        next(new ValidationError(errorMessages));
       }
       next(error);
     }

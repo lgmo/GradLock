@@ -6,7 +6,7 @@ import { securityConfig } from '../config/baseConfig';
 import { UserType } from 'generated/prisma';
 
 export const authenticate = (req: AuthenticatedRequest, _res: Response, next: NextFunction) => {
-  const [_, accessToken] = req.headers.authorization?.split(' ') ?? [];
+  const [, accessToken] = req.headers.authorization?.split(' ') ?? [];
 
   if (!accessToken) {
     next(new InvalidCredentialsError('accessToken faltando.'));
@@ -15,7 +15,7 @@ export const authenticate = (req: AuthenticatedRequest, _res: Response, next: Ne
   try {
     req.user = jwt.verify(accessToken, securityConfig.jwtSecret) as JwtPayload;
     next();
-  } catch (error) {
+  } catch {
     next(new InvalidCredentialsError('Credenciais inválidas.'));
   }
 };

@@ -1,7 +1,8 @@
+import { UserType } from '../../generated/prisma';
 import { z } from 'zod';
 
 const createStudentSchema = z.object({
-  userType: z.literal('student'),
+  userType: z.literal(UserType.STUDENT),
   cpf: z
     .string()
     .length(11, { message: 'CPF deve conter exatamente 11 dígitos' })
@@ -19,7 +20,7 @@ const createStudentSchema = z.object({
 });
 
 const createTeacherSchema = z.object({
-  userType: z.literal('teacher'),
+  userType: z.literal(UserType.TEACHER),
   cpf: z
     .string()
     .length(11, { message: 'CPF deve conter exatamente 11 dígitos' })
