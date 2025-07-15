@@ -12,10 +12,12 @@
     "lint": "eslint 'src/**/*.{ts,js}'",
     "format": "prettier --write 'src/**/*.{ts,js,json,md}'",
     "prepare": "husky",
-    "test": "jest",
+    "test": "node scripts/run-tests.js",
+    "test:smoke": "jest --testPathPatterns=smoke --verbose",
+    "test:all": "jest --testPathIgnorePatterns=smoke --verbose",
+    "test:bdd": "jest --testPathPatterns=bdd --verbose",
     "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage",
-    "test:bdd": "jest --testPathPatterns=bdd"
+    "test:coverage": "jest --coverage"
   },
   "lint-staged": {
     "src/**/*.{ts,js}": [

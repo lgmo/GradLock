@@ -16,4 +16,14 @@ describe('Smoke Test - API Health Check', () => {
     
     expect(response.status).toBe(404);
   });
+
+  it('deve ter configuração básica de CORS e middlewares', async () => {
+    const response = await request(app)
+      .get('/api/rooms')
+      .set('Origin', 'http://localhost:3000');
+    
+    expect(response.status).toBe(200);
+    expect(response.headers).toHaveProperty('content-type');
+    expect(response.headers['content-type']).toContain('application/json');
+  });
 });

@@ -1,5 +1,14 @@
 # Testes BDD Implementados - Sistema GradLock
 
+## 🚨 IMPORTANTE: Sistema de Smoke Tests
+
+O projeto agora executa **Smoke Tests primeiro** antes dos testes BDD:
+- **Comando**: `npm test` executa smoke tests → depois testes BDD
+- **Falha Rápida**: Se smoke test falhar, os demais não são executados
+- **Documentação**: Veja `TESTES_SMOKE.md` para detalhes
+
+---
+
 Este documento descreve os testes BDD (Behavior-Driven Development) implementados para o sistema GradLock usando Jest e jest-cucumber.
 
 ## Estrutura dos Testes
