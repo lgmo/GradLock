@@ -40,15 +40,15 @@ defineFeature(feature, (test) => {
       requestBody.userType = UserType.STUDENT;
     });
 
-    and('a página exibe os campos "Curso" e "Matricula"', () => {
+    and('a página exibe os campos "Curso" e "Matrícula"', () => {
       // Contexto da UI (não precisa de ação)
     });
 
-    and('ele preenche o campo "Curso" com "Ciencia da Computação"', () => {
-      requestBody.course = 'Ciencia da Computação';
+    and('ele preenche o campo "Curso" com "Ciência da Computação"', () => {
+      requestBody.course = 'Ciência da Computação';
     });
 
-    and('ele preenche o campo "Matricula" com "2021234567"', () => {
+    and('ele preenche o campo "Matrícula" com "2021234567"', () => {
       requestBody.enrollment = '2021234567';
     });
 
@@ -78,7 +78,7 @@ defineFeature(feature, (test) => {
         expect(userInDb).not.toBeNull();
         expect(userInDb!.name).toBe('João Pedro da Silva');
         expect(userInDb!.userType).toBe(UserType.STUDENT);
-        expect(userInDb!.course).toBe('Ciencia da Computação');
+        expect(userInDb!.course).toBe('Ciência da Computação');
         expect(userInDb!.enrollment).toBe('2021234567');
       },
     );

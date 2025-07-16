@@ -1,4 +1,5 @@
 import { PrismaClient, UserType } from '../../generated/prisma';
+import bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
@@ -10,7 +11,7 @@ async function main() {
     create: {
       cpf: '12345678900',
       name: 'Administrador do Sistema',
-      password: 'admin123', // Em produção, isso deve ser hasheado
+      password: await bcrypt.hash('admin123', 10), // Em produção, isso deve ser hasheado
       userType: UserType.ADMIN,
     },
   });

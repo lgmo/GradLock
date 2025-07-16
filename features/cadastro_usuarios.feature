@@ -6,9 +6,9 @@ And ele não possui cadastro prévio
 And ele está na página de cadastro
 When ele preenche o campo "Nome Completo" com "João Pedro da Silva"
 And seleciona "Tipo de vínculo" como "Discente"
-And a página exibe os campos "Curso" e "Matricula"
-And ele preenche o campo "Curso" com "Ciencia da Computação"
-And ele preenche o campo "Matricula" com "2021234567"
+And a página exibe os campos "Curso" e "Matrícula"
+And ele preenche o campo "Curso" com "Ciência da Computação"
+And ele preenche o campo "Matrícula" com "2021234567"
 And ele preenche o campo "CPF" com "123.456.789-01"
 And ele preenche o campo "Senha" com "020301"
 And clica em "Cadastrar"
