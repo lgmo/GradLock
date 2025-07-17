@@ -26,7 +26,7 @@ defineFeature(feature, (test) => {
 
   test('Listar todas as salas com sucesso', ({ given, when, then, and }) => {
     given('existem salas cadastradas no sistema', async () => {
-      // Criar algumas salas de teste
+      // Salas de teste
       await prisma.room.createMany({
         data: [
           {

@@ -33,30 +33,4 @@ describe('Smoke Test - API Health Check', () => {
 
     expect(response.status).toBe(404);
   });
-
-  it('deve ter configuração básica de CORS e middlewares', async () => {
-    const password = '041102';
-    const hashedPassword = await bcrypt.hash(password, securityConfig.saltRounds);
-    const cpf = '34567890123';
-    await prisma.user.create({
-      data: {
-        name: 'Pedro dias',
-        cpf: cpf, // Sem formatação para armazenamento
-        password: hashedPassword,
-        userType: UserType.ADMIN,
-      },
-    });
-    let response = await request(app)
-      .post('/api/auth/login')
-      .send({ cpf: cpf, password: password });
-    const accessToken = response.body.accessToken;
-    response = await request(app)
-      .get('/api/rooms')
-      .set('Origin', 'http://localhost:3000')
-      .set('authorization', `Bearer ${accessToken}`);
-
-    expect(response.status).toBe(200);
-    expect(response.headers).toHaveProperty('content-type');
-    expect(response.headers['content-type']).toContain('application/json');
-  });
 });

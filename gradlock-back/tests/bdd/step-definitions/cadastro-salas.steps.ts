@@ -46,27 +46,15 @@ defineFeature(feature, (test) => {
       // Contexto da página de cadastro
     });
 
-    when('ele preenche o campo "Nome da Sala" com "GRAD 6"', () => {
+    when('ele preenche o campo "Nome da Sala" com "GRAD 6", "Descrição" com "Laboratório de tamanho médio", "Capacidade" com "40", seleciona o campo "Tem computadores?", seleciona o campo "Tem projetores?"', () => {
       requestBody.name = 'GRAD 6';
-    });
-
-    and('ele preenche o campo "Descrição" com "Laboratório de tamanho médio"', () => {
       requestBody.description = 'Laboratório de tamanho médio';
-    });
-
-    and('ele preenche o campo "Capacidade" com "40"', () => {
       requestBody.capacity = 40;
-    });
-
-    and('ele seleciona o campo "Tem computadores?"', () => {
       requestBody.hasComputers = true;
-    });
-
-    and('ele seleciona o campo "Tem projetores?"', () => {
       requestBody.hasProjector = true;
     });
 
-    and('clica em "Cadastrar"', async () => {
+    and('seleciona "Cadastrar"', async () => {
       response = await request(app)
         .post('/api/rooms')
         .send(requestBody)
