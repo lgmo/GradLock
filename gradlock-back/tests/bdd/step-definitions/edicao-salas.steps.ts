@@ -27,7 +27,7 @@ defineFeature(feature, (test) => {
   });
 
   test('Edição de sala com sucesso', ({ given, when, then, and }) => {
-    given('o administrador "Pedro Dias"', async () => {
+    given('o administrador "Pedro Dias" com cpf "34567890123"', async () => {
       const password = '041102';
       const hashedPassword = await bcrypt.hash(password, securityConfig.saltRounds);
       const cpf = '34567890123';
@@ -96,7 +96,7 @@ defineFeature(feature, (test) => {
   });
 
   test('Edição de sala mal sucedida por falta de dados', ({ given, when, then, and }) => {
-    given('o administrador "Pedro Dias"', async () => {
+    given('o administrador "Pedro Dias" com cpf "34567890123"', async () => {
       const password = '041102';
       const hashedPassword = await bcrypt.hash(password, securityConfig.saltRounds);
       const cpf = '34567890123';
@@ -151,7 +151,7 @@ defineFeature(feature, (test) => {
   });
 
   test('Erro na edição de sala por nome indisponível', ({ given, when, then, and }) => {
-    given('o administrador "Pedro Dias"', async () => {
+    given('o administrador "Pedro Dias" com cpf "34567890123"', async () => {
       const password = '041102';
       const hashedPassword = await bcrypt.hash(password, securityConfig.saltRounds);
       const cpf = '34567890123';
@@ -221,7 +221,7 @@ defineFeature(feature, (test) => {
   });
 
   test('Erro na edição de sala por capacidade negativa', ({ given, when, then, and }) => {
-    given('o administrador "Pedro Dias"', async () => {
+    given('o administrador "Pedro Dias" com cpf "34567890123"', async () => {
       const password = '041102';
       const hashedPassword = await bcrypt.hash(password, securityConfig.saltRounds);
       const cpf = '34567890123';
@@ -284,7 +284,7 @@ defineFeature(feature, (test) => {
   });
 
   test('Erro na edição de sala por ID inexistente', ({ given, when, then, and }) => {
-    given('o administrador "Pedro Dias"', async () => {
+    given('o administrador "Pedro Dias" com cpf "34567890123"', async () => {
       const password = '041102';
       const hashedPassword = await bcrypt.hash(password, securityConfig.saltRounds);
       const cpf = '34567890123';
@@ -326,7 +326,7 @@ defineFeature(feature, (test) => {
   });
 
   test('Erro na edição de sala por ID inválido', ({ given, when, then, and }) => {
-    given('o administrador "Pedro Dias"', async () => {
+    given('o administrador "Pedro Dias" com cpf "34567890123"', async () => {
       const password = '041102';
       const hashedPassword = await bcrypt.hash(password, securityConfig.saltRounds);
       const cpf = '34567890123';

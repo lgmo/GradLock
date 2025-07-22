@@ -26,7 +26,7 @@ defineFeature(feature, (test) => {
   });
 
   test('Cadastro de sala bem sucedido', ({ given, when, then, and }) => {
-    given('o administrador "Pedro Dias"', async () => {
+    given('o administrador "Pedro Dias" com cpf "34567890123"', async () => {
       const password = '041102';
       const hashedPassword = await bcrypt.hash(password, securityConfig.saltRounds);
       const cpf = '34567890123';
@@ -92,7 +92,7 @@ defineFeature(feature, (test) => {
   });
 
   test('Cadastro de sala mal sucedido por falta de informações', ({ given, when, then, and }) => {
-    given('o administrador "Pedro Dias"', async () => {
+    given('o administrador "Pedro Dias" com cpf "34567890123"', async () => {
       const password = '041102';
       const hashedPassword = await bcrypt.hash(password, securityConfig.saltRounds);
       const cpf = '34567890123';
@@ -112,7 +112,7 @@ defineFeature(feature, (test) => {
       // Contexto da página
     });
 
-    when('deixa de preencher algum campo do formulario', () => {
+    when('deixa de preencher o campo "descrição" do formulario', () => {
       // Deixar campos vazios intencionalmente
       requestBody = {
         name: 'GRAD 7',
@@ -121,7 +121,7 @@ defineFeature(feature, (test) => {
       };
     });
 
-    and('clica em "Cadastrar"', async () => {
+    and('seleciona "Cadastrar"', async () => {
       response = await request(app)
         .post('/api/rooms')
         .send(requestBody)
@@ -144,7 +144,7 @@ defineFeature(feature, (test) => {
   });
 
   test('Cadastro de sala mal sucedido por capacidade negativa', ({ given, when, then, and }) => {
-    given('o administrador "Pedro Dias"', async () => {
+    given('o administrador "Pedro Dias" com cpf "34567890123"', async () => {
       const password = '041102';
       const hashedPassword = await bcrypt.hash(password, securityConfig.saltRounds);
       const cpf = '34567890123';
@@ -164,27 +164,15 @@ defineFeature(feature, (test) => {
       // Contexto da página
     });
 
-    when('ele preenche o campo "Nome da Sala" com "GRAD 7"', () => {
+    when('ele preenche o campo "Nome da Sala" com "GRAD 7", "Descrição" com "Laboratório de tamanho médio", "Capacidade" com "-40", seleciona o campo "Tem computadores?", seleciona o campo "Tem projetores?"', () => {
       requestBody.name = 'GRAD 7';
-    });
-
-    and('ele preenche o campo "Descrição" com "Laboratório de tamanho médio"', () => {
       requestBody.description = 'Laboratório de tamanho médio';
-    });
-
-    and('ele preenche o campo "Capacidade" com "-10"', () => {
-      requestBody.capacity = -10;
-    });
-
-    and('ele seleciona o campo "Tem computadores?"', () => {
+      requestBody.capacity = -40;
       requestBody.hasComputers = true;
-    });
-
-    and('ele seleciona o campo "Tem projetores?"', () => {
       requestBody.hasProjector = true;
     });
 
-    and('clica em "Cadastrar"', async () => {
+    and('seleciona "Cadastrar"', async () => {
       response = await request(app)
         .post('/api/rooms')
         .send(requestBody)
@@ -207,7 +195,7 @@ defineFeature(feature, (test) => {
     then,
     and,
   }) => {
-    given('o administrador "Pedro Dias"', async () => {
+    given('o administrador "Pedro Dias" com cpf "34567890123"', async () => {
       const password = '041102';
       const hashedPassword = await bcrypt.hash(password, securityConfig.saltRounds);
       const cpf = '34567890123';
@@ -247,7 +235,7 @@ defineFeature(feature, (test) => {
       requestBody.hasProjector = true;
     });
 
-    and('clica em "Cadastrar"', async () => {
+    and('seleciona "Cadastrar"', async () => {
       response = await request(app)
         .post('/api/rooms')
         .send(requestBody)

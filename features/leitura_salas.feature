@@ -1,7 +1,7 @@
 Feature: Leitura de salas
-
+ 
 Scenario: Listar todas as salas com sucesso
-Given existem salas cadastradas no sistema
+Given existem as salas "GRAD 1", "GRAD 2" e "GRAD 3" cadastradas no sistema
 When o usuário solicita a lista de todas as salas
 Then o sistema retorna todas as salas ordenadas por nome
 And a mensagem "Salas recuperadas com sucesso" é exibida
