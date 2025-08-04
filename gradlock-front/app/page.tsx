@@ -30,7 +30,7 @@ export default function Home() {
             id="user-email"
             variant="outlined"
             size="small"
-            label="Email"
+            label="CPF"
             fullWidth
           />
 
