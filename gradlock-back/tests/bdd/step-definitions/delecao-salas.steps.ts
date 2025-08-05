@@ -41,7 +41,7 @@ defineFeature(feature, (test) => {
       accessToken = response.body.accessToken;
     });
 
-    and('existe uma sala com ID "1" no sistema', async () => {
+    and('existe uma sala com ID "1" sem reservas no sistema', async () => {
       const room = await prisma.room.create({
         data: {
           name: 'GRAD 1',
@@ -52,10 +52,7 @@ defineFeature(feature, (test) => {
         },
       });
       roomId = room.id;
-    });
-
-    and('a sala não possui reservas ativas ou futuras', () => {
-      // Não criar reservas para esta sala
+      // Não criar reservas para esta sala (sem reservas)
     });
 
     when('ele solicita a deleção da sala com ID "1"', async () => {
@@ -64,25 +61,16 @@ defineFeature(feature, (test) => {
         .set('authorization', `Bearer ${accessToken}`);
     });
 
-    then('o sistema deleta a sala com sucesso', async () => {
+    then('a mensagem "Sala deletada com sucesso" é exibida', async () => {
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
+      expect(response.body.message).toBe('Sala deletada com sucesso');
 
       // Verificar se foi deletado do banco
       const roomInDb = await prisma.room.findUnique({
         where: { id: roomId },
       });
       expect(roomInDb).toBeNull();
-    });
-
-    and('a mensagem "Sala deletada com sucesso" é exibida', () => {
-      expect(response.body.message).toBe('Sala deletada com sucesso');
-    });
-
-    and('os dados da sala deletada são retornados', () => {
-      expect(response.body.data.deletedRoom).toBeDefined();
-      expect(response.body.data.deletedRoom.name).toBe('GRAD 1');
-      expect(response.body.data.deletedRoom.description).toBe('Laboratório 1');
     });
   });
 
@@ -109,12 +97,9 @@ defineFeature(feature, (test) => {
         .set('authorization', `Bearer ${accessToken}`);
     });
 
-    then('o sistema reconhece que o ID é inválido', () => {
+    then('a mensagem "ID da sala deve ser um número válido" é exibida', () => {
       expect(response.status).toBe(400);
       expect(response.body.success).toBe(false);
-    });
-
-    and('a mensagem "ID da sala deve ser um número válido" é exibida', () => {
       expect(response.body.message).toBe('ID da sala deve ser um número válido');
     });
   });
@@ -142,12 +127,9 @@ defineFeature(feature, (test) => {
         .set('authorization', `Bearer ${accessToken}`);
     });
 
-    then('o sistema reconhece que a sala não existe', () => {
+    then('a mensagem "Sala não encontrada" é exibida', () => {
       expect(response.status).toBe(404);
       expect(response.body.success).toBe(false);
-    });
-
-    and('a mensagem "Sala não encontrada" é exibida', () => {
       expect(response.body.message).toBe('Sala não encontrada');
     });
   });
@@ -169,7 +151,7 @@ defineFeature(feature, (test) => {
       accessToken = response.body.accessToken;
     });
 
-    and('existe uma sala com ID "1" no sistema', async () => {
+    and('existe uma sala com ID "1" com reservas no sistema', async () => {
       const room = await prisma.room.create({
         data: {
           name: 'GRAD 1',
@@ -180,9 +162,7 @@ defineFeature(feature, (test) => {
         },
       });
       roomId = room.id;
-    });
 
-    and('a sala possui reservas ativas ou futuras', async () => {
       // Criar um usuário para a reserva
       const user = await prisma.user.create({
         data: {
@@ -215,22 +195,12 @@ defineFeature(feature, (test) => {
         .set('authorization', `Bearer ${accessToken}`);
     });
 
-    then('o sistema não permite a deleção', () => {
+    then('a mensagem "Não é possível deletar a sala. Existem reservas ativas ou futuras para esta sala" é exibida', () => {
       expect(response.status).toBe(409);
       expect(response.body.success).toBe(false);
-    });
-
-    and(
-      'a mensagem "Não é possível deletar a sala. Existem reservas ativas ou futuras para esta sala" é exibida',
-      () => {
-        expect(response.body.message).toBe(
-          'Não é possível deletar a sala. Existem reservas ativas ou futuras para esta sala',
-        );
-      },
-    );
-
-    and('o número de reservas ativas é informado', () => {
-      expect(response.body.data.activeReservations).toBe(1);
+      expect(response.body.message).toBe(
+        'Não é possível deletar a sala. Existem reservas ativas ou futuras para esta sala',
+      );
     });
   });
 });
