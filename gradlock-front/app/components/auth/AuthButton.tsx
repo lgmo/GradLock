@@ -1,20 +1,20 @@
-import { Button } from "@mui/material";
-import { grey } from "@mui/material/colors";
+import { Button, ButtonProps } from '@mui/material';
+import { grey } from '@mui/material/colors';
 
-type AuthButtonProps = {
+interface AuthButtonProps extends ButtonProps {
     children: React.ReactNode;
     onClick?: () => void;
-    variant?: 'contained' | 'outlined';
-    color?: string;
+    backgroundColor?: string;
     hoverColor?: string;
-};
+}
 
 export default function AuthButton({
     children,
     onClick,
     variant = 'contained',
-    color = 'primary.main',
+    backgroundColor = 'primary.main',
     hoverColor = undefined,
+    ...props
 }: AuthButtonProps) {
     return (
         <Button
@@ -24,13 +24,14 @@ export default function AuthButton({
             onClick={onClick}
             sx={{
                 py: 1.5,
-                backgroundColor: color,
+                backgroundColor: backgroundColor,
                 '&:hover': {
                     ...(hoverColor && { backgroundColor: hoverColor }),
                     transform: 'translateY(-1px)',
                 },
                 transition: 'all 0.2s ease',
             }}
+            {...props}
         >
             {children}
         </Button>
