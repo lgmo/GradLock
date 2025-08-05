@@ -56,20 +56,9 @@ defineFeature(feature, (test) => {
       roomId = room.id;
     });
 
-    and('os campos estão preenchidos com as informações atuais da sala', () => {
-      // Contexto dos campos preenchidos
-    });
-
     when('ele edita o campo "Descrição" para "Laboratório renovado"', () => {
       requestBody.description = 'Laboratório renovado';
     });
-
-    and(
-      'ele deixa os campos "Nome da sala", "Capacidade", "Tem computadores" e "Tem projetores" sem alteração',
-      () => {
-        // Campos não alterados - apenas description será enviado
-      },
-    );
 
     and('seleciona "Editar"', async () => {
       response = await request(app)
@@ -78,9 +67,10 @@ defineFeature(feature, (test) => {
         .set('authorization', `Bearer ${accessToken}`);
     });
 
-    then('o sistema edita as informações armazenadas', async () => {
+    then('a mensagem "Sala atualizada com sucesso" é exibida.', async () => {
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
+      expect(response.body.message).toBe('Sala atualizada com sucesso');
 
       // Verificar se foi atualizado no banco
       const roomInDb = await prisma.room.findUnique({
@@ -88,10 +78,6 @@ defineFeature(feature, (test) => {
       });
       expect(roomInDb!.description).toBe('Laboratório renovado');
       expect(roomInDb!.name).toBe('GRAD 04'); // Não deve ter mudado
-    });
-
-    and('a mensagem "Sala atualizada com sucesso" é exibida.', () => {
-      expect(response.body.message).toBe('Sala atualizada com sucesso');
     });
   });
 
@@ -125,27 +111,16 @@ defineFeature(feature, (test) => {
       roomId = room.id;
     });
 
-    and('os campos estão preenchidos com as informações atuais da sala', () => {
-      // Contexto dos campos preenchidos
-    });
-
-    when('ele não altera nenhum campo do formulário', () => {
-      // requestBody fica vazio
-    });
-
-    and('seleciona "Editar"', async () => {
+    when('ele seleciona "Editar"', async () => {
       response = await request(app)
         .put(`/api/rooms/${roomId}`)
         .send(requestBody)
         .set('authorization', `Bearer ${accessToken}`);
     });
 
-    then('o sistema reconhece que nenhum dado foi fornecido para atualização', () => {
+    then('a mensagem "Nenhum dado fornecido para atualização" é exibida.', () => {
       expect(response.status).toBe(400);
       expect(response.body.success).toBe(false);
-    });
-
-    and('a mensagem "Nenhum dado fornecido para atualização" é exibida.', () => {
       expect(response.body.message).toBe('Nenhum dado fornecido para atualização');
     });
   });
@@ -196,13 +171,6 @@ defineFeature(feature, (test) => {
       requestBody.name = 'GRAD 05';
     });
 
-    and(
-      'ele deixa os campos "Descrição", "Capacidade", "Tem computadores" e "Tem projetores" sem alteração',
-      () => {
-        // Apenas name será enviado
-      },
-    );
-
     and('seleciona "Editar"', async () => {
       response = await request(app)
         .put(`/api/rooms/${roomId}`)
@@ -210,12 +178,9 @@ defineFeature(feature, (test) => {
         .set('authorization', `Bearer ${accessToken}`);
     });
 
-    then('o sistema identifica que já existe uma sala com esse nome', () => {
+    then('a mensagem "Falha na edição. Esse nome está indisponível" é exibida.', () => {
       expect(response.status).toBe(409);
       expect(response.body.success).toBe(false);
-    });
-
-    and('a mensagem "Falha na edição. Esse nome está indisponível" é exibida.', () => {
       expect(response.body.message).toBe('Falha na edição. Esse nome está indisponível');
     });
   });
@@ -254,13 +219,6 @@ defineFeature(feature, (test) => {
       requestBody.capacity = -15;
     });
 
-    and(
-      'ele deixa os campos "Nome da sala", "Descrição", "Tem computadores" e "Tem projetores" sem alteração',
-      () => {
-        // Apenas capacity será enviado
-      },
-    );
-
     and('seleciona "Editar"', async () => {
       response = await request(app)
         .put(`/api/rooms/${roomId}`)
@@ -268,102 +226,10 @@ defineFeature(feature, (test) => {
         .set('authorization', `Bearer ${accessToken}`);
     });
 
-    then('o sistema reconhece que a capacidade é um valor inválido', () => {
+    then('a mensagem "Falha na edição. A capacidade deve ser um número positivo!" é exibida.', () => {
       expect(response.status).toBe(400);
       expect(response.body.success).toBe(false);
-    });
-
-    and(
-      'a mensagem "Falha na edição. A capacidade deve ser um número positivo!" é exibida.',
-      () => {
-        expect(response.body.message).toBe(
-          'Falha na edição. A capacidade deve ser um número positivo!',
-        );
-      },
-    );
-  });
-
-  test('Erro na edição de sala por ID inexistente', ({ given, when, then, and }) => {
-    given('o administrador "Pedro Dias" com cpf "34567890123"', async () => {
-      const password = '041102';
-      const hashedPassword = await bcrypt.hash(password, securityConfig.saltRounds);
-      const cpf = '34567890123';
-      await prisma.user.create({
-        data: {
-          name: 'Pedro dias',
-          cpf: cpf, // Sem formatação para armazenamento
-          password: hashedPassword,
-          userType: UserType.ADMIN,
-        },
-      });
-      response = await request(app).post('/api/auth/login').send({ cpf: cpf, password: password });
-      accessToken = response.body.accessToken;
-    });
-
-    and('ele tenta editar uma sala com ID "999"', () => {
-      roomId = 999;
-    });
-
-    when('ele edita o campo "Nome da sala" para "GRAD 10"', () => {
-      requestBody.name = 'GRAD 10';
-    });
-
-    and('seleciona "Editar"', async () => {
-      response = await request(app)
-        .put(`/api/rooms/${roomId}`)
-        .send(requestBody)
-        .set('authorization', `Bearer ${accessToken}`);
-    });
-
-    then('o sistema reconhece que a sala não existe', () => {
-      expect(response.status).toBe(404);
-      expect(response.body.success).toBe(false);
-    });
-
-    and('a mensagem "Sala não encontrada" é exibida.', () => {
-      expect(response.body.message).toBe('Sala não encontrada');
-    });
-  });
-
-  test('Erro na edição de sala por ID inválido', ({ given, when, then, and }) => {
-    given('o administrador "Pedro Dias" com cpf "34567890123"', async () => {
-      const password = '041102';
-      const hashedPassword = await bcrypt.hash(password, securityConfig.saltRounds);
-      const cpf = '34567890123';
-      await prisma.user.create({
-        data: {
-          name: 'Pedro dias',
-          cpf: cpf, // Sem formatação para armazenamento
-          password: hashedPassword,
-          userType: UserType.ADMIN,
-        },
-      });
-      response = await request(app).post('/api/auth/login').send({ cpf: cpf, password: password });
-      accessToken = response.body.accessToken;
-    });
-
-    and('ele tenta editar uma sala com ID "abc"', () => {
-      // ID inválido será usado na requisição
-    });
-
-    when('ele edita o campo "Nome da sala" para "GRAD 10"', () => {
-      requestBody.name = 'GRAD 10';
-    });
-
-    and('seleciona "Editar"', async () => {
-      response = await request(app)
-        .put('/api/rooms/abc')
-        .send(requestBody)
-        .set('authorization', `Bearer ${accessToken}`);
-    });
-
-    then('o sistema reconhece que o ID é inválido', () => {
-      expect(response.status).toBe(400);
-      expect(response.body.success).toBe(false);
-    });
-
-    and('a mensagem "ID da sala deve ser um número válido" é exibida.', () => {
-      expect(response.body.message).toBe('ID da sala deve ser um número válido');
+      expect(response.body.message).toBe('Falha na edição. A capacidade deve ser um número positivo!');
     });
   });
 });

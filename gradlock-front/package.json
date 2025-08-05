@@ -6,7 +6,11 @@
     "dev": "next dev --turbopack -p 3001",
     "build": "next build",
     "start": "next start -p 3001",
-    "lint": "next lint"
+    "lint": "next lint",
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run",
+    "e2e": "cypress run --spec 'cypress/e2e/**/*.feature'",
+    "e2e:headed": "cypress run --headed --spec 'cypress/e2e/**/*.feature'"
   },
   "dependencies": {
     "@emotion/cache": "^11.14.0",
@@ -21,10 +25,13 @@
     "react-dom": "19.1.0"
   },
   "devDependencies": {
+    "@badeball/cypress-cucumber-preprocessor": "^22.2.0",
+    "@bahmutov/cypress-esbuild-preprocessor": "^2.2.5",
     "@eslint/eslintrc": "^3",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "cypress": "^14.5.3",
     "eslint": "^9",
     "eslint-config-next": "15.4.5",
     "typescript": "^5"

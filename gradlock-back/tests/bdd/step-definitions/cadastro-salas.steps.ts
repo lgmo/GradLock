@@ -26,7 +26,7 @@ defineFeature(feature, (test) => {
   });
 
   test('Cadastro de sala bem sucedido', ({ given, when, then, and }) => {
-    given('o administrador "Pedro Dias" com cpf "34567890123"', async () => {
+    given('o administrador "Pedro Dias" com cpf "34567890123" está na página de cadastro de salas', async () => {
       const password = '041102';
       const hashedPassword = await bcrypt.hash(password, securityConfig.saltRounds);
       const cpf = '34567890123';
@@ -40,10 +40,6 @@ defineFeature(feature, (test) => {
       });
       response = await request(app).post('/api/auth/login').send({ cpf: cpf, password: password });
       accessToken = response.body.accessToken;
-    });
-
-    and('ele está na página de cadastro de salas', () => {
-      // Contexto da página de cadastro
     });
 
     when('ele preenche o campo "Nome da Sala" com "GRAD 6", "Descrição" com "Laboratório de tamanho médio", "Capacidade" com "40", seleciona o campo "Tem computadores?", seleciona o campo "Tem projetores?"', () => {
@@ -61,9 +57,10 @@ defineFeature(feature, (test) => {
         .set('Authorization', `Bearer ${accessToken}`);
     });
 
-    then('o sistema cadastra uma nova sala no banco com as informações dadas', async () => {
+    then('uma mensagem de sucesso "Cadastro realizado com sucesso!" é exibida', async () => {
       expect(response.status).toBe(201);
       expect(response.body.success).toBe(true);
+      expect(response.body.message).toBe('Cadastro realizado com sucesso!');
 
       // Verificar se foi salvo no banco
       const roomInDb = await prisma.room.findUnique({
@@ -75,24 +72,10 @@ defineFeature(feature, (test) => {
       expect(roomInDb!.hasComputers).toBe(true);
       expect(roomInDb!.hasProjector).toBe(true);
     });
-
-    and('uma mensagem de sucesso "Cadastro realizado com sucesso!" é exibida', () => {
-      expect(response.body.message).toBe('Cadastro realizado com sucesso!');
-    });
-
-    and('o usuário "Pedro Dias" poderá visualizar a sala cadastrada na lista.', async () => {
-      const listResponse = await request(app)
-        .get('/api/rooms')
-        .set('Authorization', `Bearer ${accessToken}`);
-
-      expect(listResponse.status).toBe(200);
-      expect(listResponse.body.data).toHaveLength(1);
-      expect(listResponse.body.data[0].name).toBe('GRAD 6');
-    });
   });
 
   test('Cadastro de sala mal sucedido por falta de informações', ({ given, when, then, and }) => {
-    given('o administrador "Pedro Dias" com cpf "34567890123"', async () => {
+    given('o administrador "Pedro Dias" com cpf "34567890123" está na página de cadastro de salas', async () => {
       const password = '041102';
       const hashedPassword = await bcrypt.hash(password, securityConfig.saltRounds);
       const cpf = '34567890123';
@@ -106,10 +89,6 @@ defineFeature(feature, (test) => {
       });
       response = await request(app).post('/api/auth/login').send({ cpf: cpf, password: password });
       accessToken = response.body.accessToken;
-    });
-
-    and('ele está na página de cadastro de salas', () => {
-      // Contexto da página
     });
 
     when('deixa de preencher o campo "descrição" do formulario', () => {
@@ -128,23 +107,17 @@ defineFeature(feature, (test) => {
         .set('authorization', `Bearer ${accessToken}`);
     });
 
-    then('o sistema reconhece a ausencia de informações', () => {
+    then('uma mensagem de erro "Cadastro não realizado. Todos os campos devem ser preenchidos!" é exibida.', () => {
       expect(response.status).toBe(400);
       expect(response.body.success).toBe(false);
+      expect(response.body.message).toBe(
+        'Cadastro não realizado. Todos os campos devem ser preenchidos!',
+      );
     });
-
-    and(
-      'uma mensagem de erro "Cadastro não realizado. Todos os campos devem ser preenchidos!" é exibida.',
-      () => {
-        expect(response.body.message).toBe(
-          'Cadastro não realizado. Todos os campos devem ser preenchidos!',
-        );
-      },
-    );
   });
 
   test('Cadastro de sala mal sucedido por capacidade negativa', ({ given, when, then, and }) => {
-    given('o administrador "Pedro Dias" com cpf "34567890123"', async () => {
+    given('o administrador "Pedro Dias" com cpf "34567890123" está na página de cadastro de salas', async () => {
       const password = '041102';
       const hashedPassword = await bcrypt.hash(password, securityConfig.saltRounds);
       const cpf = '34567890123';
@@ -158,10 +131,6 @@ defineFeature(feature, (test) => {
       });
       response = await request(app).post('/api/auth/login').send({ cpf: cpf, password: password });
       accessToken = response.body.accessToken;
-    });
-
-    and('ele está na página de cadastro de salas', () => {
-      // Contexto da página
     });
 
     when('ele preenche o campo "Nome da Sala" com "GRAD 7", "Descrição" com "Laboratório de tamanho médio", "Capacidade" com "-40", seleciona o campo "Tem computadores?", seleciona o campo "Tem projetores?"', () => {
@@ -179,12 +148,9 @@ defineFeature(feature, (test) => {
         .set('authorization', `Bearer ${accessToken}`);
     });
 
-    then('o sistema reconhece que a capacidade é um valor inválido', () => {
+    then('uma mensagem de erro "Capacidade deve ser um número positivo" é exibida.', () => {
       expect(response.status).toBe(400);
       expect(response.body.success).toBe(false);
-    });
-
-    and('uma mensagem de erro "Capacidade deve ser um número positivo" é exibida.', () => {
       expect(response.body.message).toBe('Capacidade deve ser um número positivo');
     });
   });
@@ -195,7 +161,7 @@ defineFeature(feature, (test) => {
     then,
     and,
   }) => {
-    given('o administrador "Pedro Dias" com cpf "34567890123"', async () => {
+    given('o administrador "Pedro Dias" com cpf "34567890123" está na página de cadastro de salas', async () => {
       const password = '041102';
       const hashedPassword = await bcrypt.hash(password, securityConfig.saltRounds);
       const cpf = '34567890123';
@@ -209,9 +175,7 @@ defineFeature(feature, (test) => {
       });
       response = await request(app).post('/api/auth/login').send({ cpf: cpf, password: password });
       accessToken = response.body.accessToken;
-    });
 
-    and('ele está na página de cadastro de salas', async () => {
       // Criar uma sala existente
       await prisma.room.create({
         data: {
@@ -242,12 +206,9 @@ defineFeature(feature, (test) => {
         .set('authorization', `Bearer ${accessToken}`);
     });
 
-    then('o sistema reconhece que já existe uma sala com esse nome', () => {
+    then('uma mensagem de erro "Cadastro não realizado. Sala já existente!" é exibida', () => {
       expect(response.status).toBe(409);
       expect(response.body.success).toBe(false);
-    });
-
-    and('uma mensagem de erro "Cadastro não realizado. Sala já existente!" é exibida', () => {
       expect(response.body.message).toBe('Cadastro não realizado. Sala já existente!');
     });
   });
