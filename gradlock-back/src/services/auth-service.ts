@@ -8,10 +8,21 @@ import prisma from '../config/prismaClient';
 import { InvalidCredentialsError, NotFoundError } from '../errors/httpErrors';
 import { AuthTokens } from '../types/auth';
 
-function generateAccessToken(userId: number, userType: UserType): string {
-  const payload: JwtPayload = { userId: userId, userType: userType };
+function generateAccessToken(
+  userId: number,
+  userType: UserType,
+): {
+  accessToken: string;
+  expiresIn: number;
+} {
+  const expiresIn = 15 * 60 * 1000;
+  const epochExpiresIn = Date.now() + expiresIn;
+  const payload: JwtPayload = { userId: userId, userType: userType, exp: epochExpiresIn };
   const secretKey: string = securityConfig.jwtSecret;
-  return jwt.sign(payload, secretKey, { expiresIn: '15m' });
+  return {
+    accessToken: jwt.sign(payload, secretKey),
+    expiresIn: epochExpiresIn,
+  };
 }
 
 function generateRefreshToken(userId: number): string {
@@ -42,7 +53,7 @@ export const authService = {
     }
 
     return {
-      accessToken: generateAccessToken(existentUser.id, existentUser.userType),
+      ...generateAccessToken(existentUser.id, existentUser.userType),
       refreshToken: generateRefreshToken(existentUser.id),
     };
   },
@@ -65,7 +76,7 @@ export const authService = {
     }
 
     return {
-      accessToken: generateAccessToken(decoded.userId, existentUser.userType),
+      ...generateAccessToken(decoded.userId, existentUser.userType),
       refreshToken: generateRefreshToken(decoded.userId),
     };
   },

@@ -8,6 +8,7 @@ import { UserType } from '../../generated/prisma';
 export const authenticate = (req: AuthenticatedRequest, _res: Response, next: NextFunction) => {
   const [bearer, accessToken] = req.headers.authorization?.split(' ') ?? [];
 
+  console.log(req.headers.authorization);
   if (bearer !== 'Bearer') {
     next(new InvalidCredentialsError('Formatação inválida para header Authorization.'));
   }
