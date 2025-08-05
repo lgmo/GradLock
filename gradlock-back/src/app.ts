@@ -1,4 +1,5 @@
 import express, { ErrorRequestHandler } from 'express';
+import cors from 'cors';
 import swaggerJSDoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
 import swaggerConfig from './config/swaggerConfig';
@@ -10,6 +11,14 @@ import userRoutes from './routes/user-routes';
 import { z } from 'zod';
 
 const app = express();
+
+// Configuração do CORS para permitir requisições do frontend
+app.use(cors({
+  origin: ['http://localhost:3001'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
 app.use(express.json());
 
