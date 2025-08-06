@@ -8,15 +8,21 @@ export class RoomsController {
         orderBy: {
           name: 'asc',
         },
-        select: {
-          id: true,
-          name: true,
-          description: true,
-          capacity: true,
-          hasComputers: true,
-          hasProjector: true,
-          createdAt: true,
-          updatedAt: true,
+        include: {
+          reservations: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  name: true,
+                  userType: true,
+                },
+              },
+            },
+            orderBy: {
+              date: 'desc',
+            },
+          },
         },
       });
 

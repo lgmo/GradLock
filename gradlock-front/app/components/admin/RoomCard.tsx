@@ -8,14 +8,18 @@ import {
   Box, 
   IconButton, 
   Tooltip,
-  Stack
+  Stack,
+  Divider
 } from '@mui/material';
 import { 
   Edit as EditIcon, 
   Delete as DeleteIcon, 
   Computer as ComputerIcon, 
   Videocam as ProjectorIcon,
-  People as PeopleIcon
+  People as PeopleIcon,
+  Schedule as PendingIcon,
+  CheckCircle as ApprovedIcon,
+  Cancel as RejectedIcon
 } from '@mui/icons-material';
 import { Room } from '../../types/room';
 
@@ -34,6 +38,13 @@ export default function RoomCard({ room, onEdit, onDelete }: RoomCardProps) {
   const handleDeleteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     onDelete(room.id);
+  };
+
+  // Calcular quantidades de reservas por status
+  const reservationStats = {
+    pending: room.reservations?.filter(r => r.status === 'PENDING').length || 0,
+    approved: room.reservations?.filter(r => r.status === 'APPROVED').length || 0,
+    rejected: room.reservations?.filter(r => r.status === 'REJECTED').length || 0,
   };
 
   return (
@@ -91,7 +102,7 @@ export default function RoomCard({ room, onEdit, onDelete }: RoomCardProps) {
           </Typography>
         </Stack>
 
-        <Box display="flex" gap={1} flexWrap="wrap">
+        <Box display="flex" gap={1} flexWrap="wrap" mb={2}>
           {room.hasComputers && (
             <Chip
               icon={<ComputerIcon />}
@@ -110,6 +121,51 @@ export default function RoomCard({ room, onEdit, onDelete }: RoomCardProps) {
               variant="outlined"
             />
           )}
+        </Box>
+
+        <Divider sx={{ mb: 2 }} />
+
+        <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
+          Reservas:
+        </Typography>
+        
+        <Box display="flex" gap={1} flexWrap="wrap">
+          <Chip
+            icon={<PendingIcon />}
+            label={`Pendentes: ${reservationStats.pending}`}
+            size="small"
+            color="warning"
+            variant="filled"
+            sx={{ 
+              backgroundColor: '#fff3e0',
+              color: '#e65100',
+              '& .MuiChip-icon': { color: '#e65100' }
+            }}
+          />
+          <Chip
+            icon={<ApprovedIcon />}
+            label={`Aprovadas: ${reservationStats.approved}`}
+            size="small"
+            color="success"
+            variant="filled"
+            sx={{ 
+              backgroundColor: '#e8f5e8',
+              color: '#2e7d32',
+              '& .MuiChip-icon': { color: '#2e7d32' }
+            }}
+          />
+          <Chip
+            icon={<RejectedIcon />}
+            label={`Rejeitadas: ${reservationStats.rejected}`}
+            size="small"
+            color="error"
+            variant="filled"
+            sx={{ 
+              backgroundColor: '#ffebee',
+              color: '#c62828',
+              '& .MuiChip-icon': { color: '#c62828' }
+            }}
+          />
         </Box>
       </CardContent>
     </Card>
