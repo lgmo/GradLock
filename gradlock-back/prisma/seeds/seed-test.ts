@@ -1,4 +1,4 @@
-import { PrismaClient, UserType } from '../../generated/prisma';
+import { PrismaClient, UserType, ReservationStatus } from '../../generated/prisma';
 import bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
@@ -92,8 +92,35 @@ async function main() {
     },
   });
 
+  // Criar algumas reservas para demonstrar o sistema
+  
+  // Reserva aprovada - Professor usando GRAD 6
+  const reserva1 = await prisma.reservation.create({
+    data: {
+      userId: professor1.id,
+      roomId: sala1.id,
+      date: new Date('2025-08-15'),
+      startTime: '08:00',
+      endTime: '10:00',
+      status: ReservationStatus.APPROVED,
+      reason: 'Aula prática de Algoritmos e Estruturas de Dados',
+    },
+  });
+
+  // Reserva rejeitada - Aluno tentando usar A101
+  const reserva2 = await prisma.reservation.create({
+    data: {
+      userId: aluno2.id,
+      roomId: sala3.id,
+      date: new Date('2025-08-18'),
+      startTime: '10:00',
+      endTime: '12:00',
+      status: ReservationStatus.REJECTED,
+      reason: 'Evento estudantil - Palestras sobre carreira',
+    },
+  });
+
   console.log('Dados de seed criados com sucesso!');
-  console.log({ admin, professor1, aluno1, aluno2, sala1, sala2, sala3 });
 }
 
 main()
