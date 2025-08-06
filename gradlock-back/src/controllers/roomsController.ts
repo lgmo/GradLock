@@ -307,29 +307,32 @@ export class RoomsController {
         return;
       }
 
-      // Verificar se há reservas ativas para esta sala
-      const activeReservations = await prisma.reservation.findMany({
+      // Verificar se há reservas que impedem a exclusão (aprovadas ou pendentes)
+      const blockingReservations = await prisma.reservation.findMany({
         where: {
           roomId: roomId,
           date: {
             gte: new Date(), // Reservas futuras ou de hoje
           },
+          status: {
+            in: ['PENDING', 'APPROVED'], // Apenas reservas pendentes ou aprovadas bloqueiam a exclusão
+          },
         },
       });
 
-      if (activeReservations.length > 0) {
+      if (blockingReservations.length > 0) {
         res.status(409).json({
           success: false,
           message:
             'Não é possível deletar a sala. Existem reservas ativas ou futuras para esta sala',
           data: {
-            activeReservations: activeReservations.length,
+            blockingReservations: blockingReservations.length,
           },
         });
         return;
       }
 
-      // Deletar a sala (as reservas passadas serão deletadas em cascata)
+      // Deletar a sala (as reservas passadas e rejeitadas serão deletadas em cascata)
       await prisma.room.delete({
         where: { id: roomId },
       });
