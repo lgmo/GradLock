@@ -6,8 +6,6 @@ import swaggerConfig from './config/swaggerConfig';
 
 import { AppError, InternalServerError, ValidationError } from './errors/httpErrors';
 import apiRouter from './routes/api';
-import authRoutes from './routes/auth-routes';
-import userRoutes from './routes/user-routes';
 import { z } from 'zod';
 
 const app = express();
@@ -26,8 +24,6 @@ const swaggerDocs = swaggerJSDoc(swaggerConfig);
 
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 app.use('/api', apiRouter);
-app.use('/api/users', userRoutes);
-app.use('/api/auth', authRoutes);
 
 // Middleware de tratamento de erros com tipagem do Express
 const errorHandler: ErrorRequestHandler = (error, _req, res, _next) => {
