@@ -8,7 +8,7 @@ Then uma mensagem de sucesso "Cadastro realizado com sucesso!" é exibida
 
 Scenario: Cadastro de sala mal sucedido por falta de informações
 Given o administrador "Pedro Dias" com cpf "34567890123" está na página de cadastro de salas
-When deixa de preencher o campo "descrição" do formulario
+When ele preencher o campo "Descrição" do formulario com ""
 And seleciona "Cadastrar"
 Then uma mensagem de erro "Cadastro não realizado. Todos os campos devem ser preenchidos!" é exibida.
 

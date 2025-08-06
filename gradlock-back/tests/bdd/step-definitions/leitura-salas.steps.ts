@@ -11,7 +11,7 @@ const feature = loadFeature('../features/leitura_salas.feature');
 defineFeature(feature, (test) => {
   let response: any;
   let roomId: number;
-  let accessToekn: any;
+  let accessToken: any;
 
   beforeEach(async () => {
     // Limpar dados antes de cada teste
@@ -118,6 +118,78 @@ defineFeature(feature, (test) => {
 
     and('a mensagem "Salas recuperadas com sucesso" é exibida', () => {
       expect(response.body.message).toBe('Salas recuperadas com sucesso');
+    });
+  });
+
+  test('Listar uma sala específica com sucesso', ({ given, when, then, and }) => {
+    given('existe a sala "GRAD 1" cadastrada no sistema', async () => {
+      const room = await prisma.room.create({
+        data: {
+          name: 'GRAD 1',
+          description: 'Laboratório 1',
+          capacity: 30,
+          hasComputers: true,
+          hasProjector: false,
+        },
+      });
+      roomId = room.id;
+    });
+
+    when('o usuário logado com cpf "12345678901" solicita a lista da sala "GRAD 1"', async () => {
+      const password = '041102';
+      const hashedPassword = await bcrypt.hash(password, securityConfig.saltRounds);
+      const cpf = '12345678901';
+      await prisma.user.create({
+        data: {
+          name: 'João Silva',
+          cpf: cpf,
+          password: hashedPassword,
+          userType: UserType.STUDENT,
+        },
+      });
+      response = await request(app).post('/api/auth/login').send({ cpf: cpf, password: password });
+      const accessToken = response.body.accessToken;
+      response = await request(app).get(`/api/rooms/${roomId}`).set('authorization', `Bearer ${accessToken}`);
+    });
+
+    then('o sistema retorna a sala "GRAD 1"', () => {
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.data.name).toBe('GRAD 1');
+      expect(response.body.data.id).toBe(roomId);
+    });
+
+    and('a mensagem "Sala encontrada com sucesso" é exibida', () => {
+      expect(response.body.message).toBe('Sala encontrada com sucesso');
+    });
+  });
+
+  test('Listar uma sala específica que não existe', ({ given, when, then }) => {
+    given('não existe a sala "GRAD 404" cadastrada no sistema', () => {
+      // Não criar nenhuma sala com esse nome
+    });
+
+    when('o usuário logado com cpf "12345678901" solicita a lista da sala "GRAD 404"', async () => {
+      const password = '041102';
+      const hashedPassword = await bcrypt.hash(password, securityConfig.saltRounds);
+      const cpf = '12345678901';
+      await prisma.user.create({
+        data: {
+          name: 'João Silva',
+          cpf: cpf,
+          password: hashedPassword,
+          userType: UserType.STUDENT,
+        },
+      });
+      response = await request(app).post('/api/auth/login').send({ cpf: cpf, password: password });
+      const accessToken = response.body.accessToken;
+      response = await request(app).get('/api/rooms/999').set('authorization', `Bearer ${accessToken}`); // ID que não existe
+    });
+
+    then('o sistema retorna uma mensagem "Sala não encontrada"', () => {
+      expect(response.status).toBe(404);
+      expect(response.body.success).toBe(false);
+      expect(response.body.message).toBe('Sala não encontrada');
     });
   });
 });

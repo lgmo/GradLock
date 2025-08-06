@@ -25,7 +25,7 @@ defineFeature(feature, (test) => {
   });
 
   test('Deleção de sala com sucesso', ({ given, when, then, and }) => {
-    given('o administrador "Pedro Dias"', async () => {
+    given('o administrador "Pedro Dias" com cpf "34567890123" está na página de gerenciamento de salas', async () => {
       const password = '041102';
       const hashedPassword = await bcrypt.hash(password, securityConfig.saltRounds);
       const cpf = '34567890123';
@@ -75,7 +75,7 @@ defineFeature(feature, (test) => {
   });
 
   test('Erro na deleção por ID inválido', ({ given, when, then, and }) => {
-    given('o administrador "Pedro Dias"', async () => {
+    given('o administrador "Pedro Dias" com cpf "34567890123" está na página de gerenciamento de salas', async () => {
       const password = '041102';
       const hashedPassword = await bcrypt.hash(password, securityConfig.saltRounds);
       const cpf = '34567890123';
@@ -96,7 +96,7 @@ defineFeature(feature, (test) => {
         .delete('/api/rooms/abc')
         .set('authorization', `Bearer ${accessToken}`);
     });
-
+ 
     then('a mensagem "ID da sala deve ser um número válido" é exibida', () => {
       expect(response.status).toBe(400);
       expect(response.body.success).toBe(false);
@@ -105,7 +105,7 @@ defineFeature(feature, (test) => {
   });
 
   test('Erro na deleção por sala inexistente', ({ given, when, then, and }) => {
-    given('o administrador "Pedro Dias"', async () => {
+    given('o administrador "Pedro Dias" com cpf "34567890123" está na página de gerenciamento de salas', async () => {
       const password = '041102';
       const hashedPassword = await bcrypt.hash(password, securityConfig.saltRounds);
       const cpf = '34567890123';
@@ -135,7 +135,7 @@ defineFeature(feature, (test) => {
   });
 
   test('Erro na deleção por reservas ativas', ({ given, when, then, and }) => {
-    given('o administrador "Pedro Dias"', async () => {
+    given('o administrador "Pedro Dias" com cpf "34567890123" está na página de gerenciamento de salas', async () => {
       const password = '041102';
       const hashedPassword = await bcrypt.hash(password, securityConfig.saltRounds);
       const cpf = '34567890123';

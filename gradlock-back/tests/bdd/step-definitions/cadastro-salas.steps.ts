@@ -91,7 +91,7 @@ defineFeature(feature, (test) => {
       accessToken = response.body.accessToken;
     });
 
-    when('deixa de preencher o campo "descrição" do formulario', () => {
+    when('ele preencher o campo "Descrição" do formulario com ""', () => {
       // Deixar campos vazios intencionalmente
       requestBody = {
         name: 'GRAD 7',

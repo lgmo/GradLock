@@ -154,7 +154,9 @@ defineFeature(feature, (test) => {
         },
       });
       roomId = room.id;
+    });
 
+    and('existe uma sala com o nome "GRAD 05" cadastrada', async () => {
       // Criar sala GRAD 05 (que já existe)
       await prisma.room.create({
         data: {
@@ -166,7 +168,7 @@ defineFeature(feature, (test) => {
         },
       });
     });
-
+ 
     when('ele edita o campo "Nome da sala" para "GRAD 05"', () => {
       requestBody.name = 'GRAD 05';
     });

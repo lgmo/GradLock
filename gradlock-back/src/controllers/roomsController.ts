@@ -94,6 +94,7 @@ export class RoomsController {
       });
     }
   }
+  
   static async createRoom(req: Request, res: Response): Promise<void> {
     try {
       const { name, description, capacity, hasComputers, hasProjector } = req.body;
