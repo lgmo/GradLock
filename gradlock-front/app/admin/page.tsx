@@ -119,8 +119,8 @@ export default function AdminPage() {
             }
         } catch (error: any) {
             console.error('Erro ao salvar sala:', error);
-            showSnackbar(error.message || 'Erro ao salvar sala', 'error');
-            throw error; // Re-throw para o modal continuar mostrando o loading
+            // O erro agora é exibido no modal, então apenas re-throw
+            throw error;
         }
     };
 

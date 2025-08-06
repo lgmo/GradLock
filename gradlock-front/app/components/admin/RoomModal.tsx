@@ -10,7 +10,8 @@ import {
   Checkbox,
   Button,
   Box,
-  Typography
+  Typography,
+  Alert
 } from '@mui/material';
 import { useState, useEffect } from 'react';
 import { Room, CreateRoomData, UpdateRoomData } from '../../types/room';
@@ -33,6 +34,7 @@ export default function RoomModal({ open, onClose, onSave, room, mode }: RoomMod
   });
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [generalError, setGeneralError] = useState<string | null>(null);
 
   useEffect(() => {
     if (room && mode === 'edit') {
@@ -53,6 +55,7 @@ export default function RoomModal({ open, onClose, onSave, room, mode }: RoomMod
       });
     }
     setErrors({});
+    setGeneralError(null);
   }, [room, mode, open]);
 
   const validateForm = () => {
@@ -75,10 +78,46 @@ export default function RoomModal({ open, onClose, onSave, room, mode }: RoomMod
     return Object.keys(newErrors).length === 0;
   };
 
+  const mapServerErrorToField = (errorMessage: string) => {
+    const newErrors: { [key: string]: string } = {};
+    
+    // Mapear erros de capacidade
+    if (errorMessage.includes('capacidade') && 
+        (errorMessage.includes('positivo') || errorMessage.includes('número'))) {
+      newErrors.capacity = errorMessage;
+    }
+    // Mapear erros de nome/sala existente
+    else if (errorMessage.includes('já existente') || 
+             errorMessage.includes('já está cadastrada') ||
+             errorMessage.includes('nome está indisponível') ||
+             errorMessage.includes('indisponível')) {
+      newErrors.name = errorMessage;
+    }
+    // Mapear erros de campos obrigatórios
+    else if (errorMessage.includes('campos devem ser preenchidos') ||
+             errorMessage.includes('descrição') && errorMessage.includes('obrigatór')) {
+      newErrors.description = errorMessage;
+    }
+    // Mapear erros de dados não fornecidos (edição)
+    else if (errorMessage.includes('Nenhum dado fornecido')) {
+      setGeneralError(errorMessage);
+      return;
+    }
+    // Outros erros gerais
+    else {
+      setGeneralError(errorMessage);
+      return;
+    }
+
+    setErrors(prev => ({ ...prev, ...newErrors }));
+  };
+
   const handleSubmit = async () => {
     if (!validateForm()) return;
 
     setLoading(true);
+    setGeneralError(null);
+    setErrors({});
     try {
       const roomData = {
         name: formData.name.trim(),
@@ -90,8 +129,9 @@ export default function RoomModal({ open, onClose, onSave, room, mode }: RoomMod
 
       await onSave(roomData);
       onClose();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao salvar sala:', error);
+      mapServerErrorToField(error.message || 'Erro ao salvar sala');
     } finally {
       setLoading(false);
     }
@@ -111,6 +151,11 @@ export default function RoomModal({ open, onClose, onSave, room, mode }: RoomMod
         [field]: ''
       }));
     }
+
+    // Limpar erro geral quando usuário começar a digitar
+    if (generalError) {
+      setGeneralError(null);
+    }
   };
 
   return (
@@ -120,6 +165,12 @@ export default function RoomModal({ open, onClose, onSave, room, mode }: RoomMod
       </DialogTitle>
       
       <DialogContent>
+        {generalError && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {generalError}
+          </Alert>
+        )}
+        
         <Box display="flex" flexDirection="column" gap={3} mt={1}>
           <TextField
             label="Nome da Sala"
