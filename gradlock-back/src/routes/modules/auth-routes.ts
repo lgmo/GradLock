@@ -1,9 +1,9 @@
 import express from 'express';
-import { authController } from '../controllers/auth-controllers';
-import { validateRequest } from '../middlewares/validation-middlewares';
-import { authCredentialsSchema, refreshTokenSchema } from '../validators/auth-validators';
+import { authController } from '../../controllers/auth-controllers';
+import { validateRequest } from '../../middlewares/validation-middlewares';
+import { authCredentialsSchema, refreshTokenSchema } from '../../validators/auth-validators';
 
-const router = express.Router();
+const authRouter = express.Router();
 
 /**
  * @swagger
@@ -43,7 +43,7 @@ const router = express.Router();
  *                    type: string
  *                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJmNjczYWEyZS1kMTgxLTRkNTYtYWE2OS0yYjE2N2E1YmZmMzUiLCJ1c2VyVHlwZSI6ImNsaWVudGUiLCJpYXQiOjE2ODg4NjM2MDAsImV4cCI6MTY4ODg2NDgwMH0.1a2b3c4d5e6f7g8h9i0jKLmnopQRSTUVwxYz
  */
-router.post('/login', validateRequest({ bodySchema: authCredentialsSchema }), authController.login);
+authRouter.post('/login', validateRequest({ bodySchema: authCredentialsSchema }), authController.login);
 
 /**
  * @swagger
@@ -79,10 +79,10 @@ router.post('/login', validateRequest({ bodySchema: authCredentialsSchema }), au
  *                    type: string
  *                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJmNjczYWEyZS1kMTgxLTRkNTYtYWE2OS0yYjE2N2E1YmZmMzUiLCJ1c2VyVHlwZSI6ImNsaWVudGUiLCJpYXQiOjE2ODg4NjM2MDAsImV4cCI6MTY4ODg2NDgwMH0.1a2b3c4d5e6f7g8h9i0jKLmnopQRSTUVwxYz
  */
-router.post(
+authRouter.post(
   '/refresh-token',
   validateRequest({ bodySchema: refreshTokenSchema }),
   authController.refreshToken,
 );
 
-export default router;
+export default authRouter;
