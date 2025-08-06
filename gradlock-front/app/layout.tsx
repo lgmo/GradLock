@@ -29,7 +29,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable}`}>
+      <body 
+        className={`${geistSans.variable} ${geistMono.variable}`}
+        suppressHydrationWarning={true}
+      >
         <AppRouterCacheProvider>
           <StyledRoot>
             <Box
@@ -81,7 +84,7 @@ export default function RootLayout({
               zIndex: 2,
             }}>
               <Typography variant="caption">
-                Projeto desenvolvido para a disciplina de Engenharia de Software - UFPE © {new Date().getFullYear()}
+                Projeto desenvolvido para a disciplina de Engenharia de Software e Sistemas - UFPE © 2025
               </Typography>
             </Box>
           </StyledRoot>
