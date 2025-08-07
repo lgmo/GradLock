@@ -9,9 +9,9 @@ import {
     useMediaQuery,
 } from '@mui/material';
 import { useState } from 'react';
-import Logo from '../components/ui/Logo';
-import RoomsTab from '../components/admin/RoomsTab';
-import ReservationsTab from '../components/admin/ReservationsTab';
+import Logo from '@/components/ui/Logo';
+import RoomsTab from '@/components/admin/RoomsTab';
+import ReservationsTab from '@/components/admin/ReservationsTab';
 
 interface TabPanelProps {
     children?: React.ReactNode;

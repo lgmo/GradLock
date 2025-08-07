@@ -49,7 +49,7 @@ export const authService = {
     const isPasswordCorrect = await bcrypt.compare(user.password, existentUser.password);
 
     if (!isPasswordCorrect) {
-      throw new InvalidCredentialsError('Password inválido.');
+      throw new InvalidCredentialsError('password inválido.');
     }
 
     return {
