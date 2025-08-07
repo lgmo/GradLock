@@ -118,7 +118,7 @@ export default function ReservationCard({}: ReservationCardProps) {
 
   const getStatusColor = (status: ReservationStatus) => {
     switch (status) {
-      case ReservationStatus.CONFIRMED:
+      case ReservationStatus.APPROVED:
         return 'success';
       case ReservationStatus.PENDING:
         return 'warning';
@@ -264,7 +264,7 @@ export default function ReservationCard({}: ReservationCardProps) {
                   <em>Todos os status</em>
                 </MenuItem>
                 <MenuItem value={ReservationStatus.PENDING}>Pendente</MenuItem>
-                <MenuItem value={ReservationStatus.CONFIRMED}>Confirmado</MenuItem>
+                <MenuItem value={ReservationStatus.APPROVED}>Confirmado</MenuItem>
                 <MenuItem value={ReservationStatus.REJECTED}>Rejeitado</MenuItem>
               </Select>
             </FormControl>
