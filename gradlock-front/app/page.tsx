@@ -1,13 +1,6 @@
 'use client';
 
-import {
-    Alert,
-    AlertProps,
-    Box,
-    Snackbar,
-    TextField,
-    Typography,
-} from '@mui/material';
+import { Box, TextField, Typography } from '@mui/material';
 import Logo from '@/components/ui/Logo';
 import AuthCard from '@/components/auth/AuthCard';
 import AuthButton from '@/components/auth/AuthButton';
@@ -15,64 +8,18 @@ import { grey } from '@mui/material/colors';
 import { useEffect, useState } from 'react';
 import { AuthService } from './api/services/authService';
 import { useRouter } from 'next/navigation';
+import useSnackbar from './hooks/useSnackbar';
+import { CustomSnackbar } from './components/ui/CustomSnackBar';
 
 export default function Home() {
     const router = useRouter();
 
-  useEffect(() => {
-    const token = localStorage.getItem('accessToken');
-    if (token) {
-      router.push('/admin');
-    }
-  }, [router]);
-    type SnackbarState = {
-        open: boolean;
-        message: string;
-        severity: AlertProps['severity'];
-    };
-
-    const useSnackbar = () => {
-        const [snackbar, setSnackbar] = useState<SnackbarState>({
-            open: false,
-            message: '',
-            severity: 'success',
-        });
-
-        const showSnackbar = (
-            message: string,
-            severity: AlertProps['severity'] = 'success'
-        ) => {
-            setSnackbar({ open: true, message, severity });
-        };
-
-        const closeSnackbar = () => {
-            setSnackbar((prev) => ({ ...prev, open: false }));
-        };
-
-        return { snackbar, showSnackbar, closeSnackbar };
-    };
-
-    const CustomSnackbar = ({
-        snackbar,
-        onClose,
-    }: {
-        snackbar: SnackbarState;
-        onClose: () => void;
-    }) => (
-        <Snackbar
-            open={snackbar.open}
-            autoHideDuration={4000}
-            onClose={onClose}
-        >
-            <Alert
-                onClose={onClose}
-                severity={snackbar.severity}
-                variant="filled"
-            >
-                {snackbar.message}
-            </Alert>
-        </Snackbar>
-    );
+    useEffect(() => {
+        const token = localStorage.getItem('accessToken');
+        if (token) {
+            router.push('/admin');
+        }
+    }, [router]);
 
     const { snackbar, showSnackbar, closeSnackbar } = useSnackbar();
     const [cpf, setCpf] = useState('');
