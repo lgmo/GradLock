@@ -7,15 +7,17 @@
     "start": "npm run build && node dist/server.js",
     "dev": "prisma generate && nodemon",
     "dev:watch": "nodemon",
-    "seed": "ts-node prisma/seed.ts",
+    "seed": "ts-node prisma/seeds/seed-test.ts",
     "postinstall": "prisma generate",
     "lint": "eslint 'src/**/*.{ts,js}'",
     "format": "prettier --write 'src/**/*.{ts,js,json,md}'",
     "prepare": "husky",
-    "test": "jest",
+    "test": "node scripts/run-tests.js",
+    "test:smoke": "jest --testPathPatterns=smoke --verbose",
+    "test:all": "jest --testPathIgnorePatterns=smoke --verbose",
+    "test:bdd": "jest --testPathPatterns=bdd --verbose",
     "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage",
-    "test:bdd": "jest --testPathPatterns=bdd"
+    "test:coverage": "jest --coverage"
   },
   "lint-staged": {
     "src/**/*.{ts,js}": [
@@ -29,7 +31,9 @@
   "description": "",
   "dependencies": {
     "@prisma/client": "^6.11.1",
+    "@types/cors": "^2.8.19",
     "bcrypt": "^6.0.0",
+    "cors": "^2.8.5",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
     "swagger-jsdoc": "^6.2.8",

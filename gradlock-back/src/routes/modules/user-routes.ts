@@ -1,14 +1,16 @@
 import express from 'express';
-import userController from '../controllers/user-controllers';
-import { validateRequest } from '../middlewares/validation-middlewares';
-import { createUserSchema } from '../validators/user-validators';
+import userController from '../../controllers/user-controllers';
+import { validateRequest } from '../../middlewares/validation-middlewares';
+import { createUserSchema } from '../../validators/user-validators';
 
-const router = express.Router();
+const userRouter = express.Router();
 
 /**
  * @swagger
  * /api/users:
  *   post:
+ *     tags:
+ *       - Users
  *     summary: Registra usuário
  *     requestBody:
  *       required: true
@@ -75,6 +77,6 @@ const router = express.Router();
  *                    format: date-time
  *                    example: '2025-01-01T00:00:00Z'
  */
-router.post('', validateRequest({ bodySchema: createUserSchema }), userController.createUser);
+userRouter.post('', validateRequest({ bodySchema: createUserSchema }), userController.createUser);
 
-export default router;
+export default userRouter;

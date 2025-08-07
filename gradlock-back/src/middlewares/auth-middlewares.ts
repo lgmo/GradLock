@@ -3,10 +3,15 @@ import { AuthenticatedRequest, JwtPayload } from '../types/auth';
 import { NextFunction, Response } from 'express';
 import { ForbiddenError, InvalidCredentialsError } from '../errors/httpErrors';
 import { securityConfig } from '../config/baseConfig';
-import { UserType } from 'generated/prisma';
+import { UserType } from '../../generated/prisma';
 
 export const authenticate = (req: AuthenticatedRequest, _res: Response, next: NextFunction) => {
-  const [, accessToken] = req.headers.authorization?.split(' ') ?? [];
+  const [bearer, accessToken] = req.headers.authorization?.split(' ') ?? [];
+
+  console.log(req.headers.authorization);
+  if (bearer !== 'Bearer') {
+    next(new InvalidCredentialsError('Formatação inválida para header Authorization.'));
+  }
 
   if (!accessToken) {
     next(new InvalidCredentialsError('accessToken faltando.'));
@@ -21,8 +26,12 @@ export const authenticate = (req: AuthenticatedRequest, _res: Response, next: Ne
 };
 
 export const authorization =
-  (userType: UserType) => (req: AuthenticatedRequest, _res: Response, next: NextFunction) => {
-    if (req.user?.userType !== UserType.ADMIN && req.user?.userType !== userType) {
+  (userTypes: UserType[] = []) =>
+  (req: AuthenticatedRequest, _res: Response, next: NextFunction) => {
+    if (
+      req.user?.userType !== UserType.ADMIN &&
+      !userTypes.includes(req.user?.userType as UserType)
+    ) {
       next(new ForbiddenError('Acesso negado.'));
     }
 

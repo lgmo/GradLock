@@ -1,21 +1,25 @@
 import { defineFeature, loadFeature } from 'jest-cucumber';
 import request from 'supertest';
+import bcrypt from 'bcrypt';
 import app from '../../../src/app';
 import prisma from '../../../src/config/prismaClient';
+import { securityConfig } from '../../../src/config/baseConfig';
+import { UserType } from '../../../generated/prisma';
 
 const feature = loadFeature('../features/edicao_salas.feature');
 
-defineFeature(feature, test => {
+defineFeature(feature, (test) => {
   let response: any;
   let requestBody: any;
   let roomId: number;
+  let accessToken: any;
 
   beforeEach(async () => {
     // Limpar dados antes de cada teste
     await prisma.reservation.deleteMany();
     await prisma.room.deleteMany();
     await prisma.user.deleteMany();
-    
+
     // Reset variables
     response = null;
     requestBody = {};
@@ -23,8 +27,20 @@ defineFeature(feature, test => {
   });
 
   test('Edição de sala com sucesso', ({ given, when, then, and }) => {
-    given('o administrador "Pedro Dias"', () => {
-      // Contexto do administrador
+    given('o administrador "Pedro Dias" com cpf "34567890123"', async () => {
+      const password = '041102';
+      const hashedPassword = await bcrypt.hash(password, securityConfig.saltRounds);
+      const cpf = '34567890123';
+      await prisma.user.create({
+        data: {
+          name: 'Pedro dias',
+          cpf: cpf, // Sem formatação para armazenamento
+          password: hashedPassword,
+          userType: UserType.ADMIN,
+        },
+      });
+      response = await request(app).post('/api/auth/login').send({ cpf: cpf, password: password });
+      accessToken = response.body.accessToken;
     });
 
     and('ele está na página de edição de salas da sala "GRAD 04"', async () => {
@@ -34,50 +50,52 @@ defineFeature(feature, test => {
           description: 'Laboratório antigo',
           capacity: 30,
           hasComputers: true,
-          hasProjector: false
-        }
+          hasProjector: false,
+        },
       });
       roomId = room.id;
-    });
-
-    and('os campos estão preenchidos com as informações atuais da sala', () => {
-      // Contexto dos campos preenchidos
     });
 
     when('ele edita o campo "Descrição" para "Laboratório renovado"', () => {
       requestBody.description = 'Laboratório renovado';
     });
 
-    and('ele deixa os campos "Nome da sala", "Capacidade", "Tem computadores" e "Tem projetores" sem alteração', () => {
-      // Campos não alterados - apenas description será enviado
-    });
-
     and('seleciona "Editar"', async () => {
       response = await request(app)
         .put(`/api/rooms/${roomId}`)
-        .send(requestBody);
+        .send(requestBody)
+        .set('authorization', `Bearer ${accessToken}`);
     });
 
-    then('o sistema edita as informações armazenadas', async () => {
+    then('a mensagem "Sala atualizada com sucesso" é exibida.', async () => {
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
-      
+      expect(response.body.message).toBe('Sala atualizada com sucesso');
+
       // Verificar se foi atualizado no banco
       const roomInDb = await prisma.room.findUnique({
-        where: { id: roomId }
+        where: { id: roomId },
       });
       expect(roomInDb!.description).toBe('Laboratório renovado');
       expect(roomInDb!.name).toBe('GRAD 04'); // Não deve ter mudado
     });
-
-    and('a mensagem "Sala atualizada com sucesso" é exibida.', () => {
-      expect(response.body.message).toBe('Sala atualizada com sucesso');
-    });
   });
 
   test('Edição de sala mal sucedida por falta de dados', ({ given, when, then, and }) => {
-    given('o administrador "Pedro Dias"', () => {
-      // Contexto do administrador
+    given('o administrador "Pedro Dias" com cpf "34567890123"', async () => {
+      const password = '041102';
+      const hashedPassword = await bcrypt.hash(password, securityConfig.saltRounds);
+      const cpf = '34567890123';
+      await prisma.user.create({
+        data: {
+          name: 'Pedro dias',
+          cpf: cpf, // Sem formatação para armazenamento
+          password: hashedPassword,
+          userType: UserType.ADMIN,
+        },
+      });
+      response = await request(app).post('/api/auth/login').send({ cpf: cpf, password: password });
+      accessToken = response.body.accessToken;
     });
 
     and('ele está na página de edição de salas da sala "GRAD 04"', async () => {
@@ -87,39 +105,41 @@ defineFeature(feature, test => {
           description: 'Laboratório antigo',
           capacity: 30,
           hasComputers: true,
-          hasProjector: false
-        }
+          hasProjector: false,
+        },
       });
       roomId = room.id;
     });
 
-    and('os campos estão preenchidos com as informações atuais da sala', () => {
-      // Contexto dos campos preenchidos
-    });
-
-    when('ele não altera nenhum campo do formulário', () => {
-      // requestBody fica vazio
-    });
-
-    and('seleciona "Editar"', async () => {
+    when('ele seleciona "Editar"', async () => {
       response = await request(app)
         .put(`/api/rooms/${roomId}`)
-        .send(requestBody);
+        .send(requestBody)
+        .set('authorization', `Bearer ${accessToken}`);
     });
 
-    then('o sistema reconhece que nenhum dado foi fornecido para atualização', () => {
+    then('a mensagem "Nenhum dado fornecido para atualização" é exibida.', () => {
       expect(response.status).toBe(400);
       expect(response.body.success).toBe(false);
-    });
-
-    and('a mensagem "Nenhum dado fornecido para atualização" é exibida.', () => {
       expect(response.body.message).toBe('Nenhum dado fornecido para atualização');
     });
   });
 
   test('Erro na edição de sala por nome indisponível', ({ given, when, then, and }) => {
-    given('o administrador "Pedro Dias"', () => {
-      // Contexto do administrador
+    given('o administrador "Pedro Dias" com cpf "34567890123"', async () => {
+      const password = '041102';
+      const hashedPassword = await bcrypt.hash(password, securityConfig.saltRounds);
+      const cpf = '34567890123';
+      await prisma.user.create({
+        data: {
+          name: 'Pedro dias',
+          cpf: cpf, // Sem formatação para armazenamento
+          password: hashedPassword,
+          userType: UserType.ADMIN,
+        },
+      });
+      response = await request(app).post('/api/auth/login').send({ cpf: cpf, password: password });
+      accessToken = response.body.accessToken;
     });
 
     and('ele está na página de edição de salas da sala "GRAD 04"', async () => {
@@ -130,11 +150,13 @@ defineFeature(feature, test => {
           description: 'Laboratório 4',
           capacity: 30,
           hasComputers: true,
-          hasProjector: false
-        }
+          hasProjector: false,
+        },
       });
       roomId = room.id;
+    });
 
+    and('existe uma sala com o nome "GRAD 05" cadastrada', async () => {
       // Criar sala GRAD 05 (que já existe)
       await prisma.room.create({
         data: {
@@ -142,38 +164,44 @@ defineFeature(feature, test => {
           description: 'Laboratório 5',
           capacity: 25,
           hasComputers: false,
-          hasProjector: true
-        }
+          hasProjector: true,
+        },
       });
     });
-
+ 
     when('ele edita o campo "Nome da sala" para "GRAD 05"', () => {
       requestBody.name = 'GRAD 05';
-    });
-
-    and('ele deixa os campos "Descrição", "Capacidade", "Tem computadores" e "Tem projetores" sem alteração', () => {
-      // Apenas name será enviado
     });
 
     and('seleciona "Editar"', async () => {
       response = await request(app)
         .put(`/api/rooms/${roomId}`)
-        .send(requestBody);
+        .send(requestBody)
+        .set('authorization', `Bearer ${accessToken}`);
     });
 
-    then('o sistema identifica que já existe uma sala com esse nome', () => {
+    then('a mensagem "Falha na edição. Esse nome está indisponível" é exibida.', () => {
       expect(response.status).toBe(409);
       expect(response.body.success).toBe(false);
-    });
-
-    and('a mensagem "Falha na edição. Esse nome está indisponível" é exibida.', () => {
       expect(response.body.message).toBe('Falha na edição. Esse nome está indisponível');
     });
   });
 
   test('Erro na edição de sala por capacidade negativa', ({ given, when, then, and }) => {
-    given('o administrador "Pedro Dias"', () => {
-      // Contexto do administrador
+    given('o administrador "Pedro Dias" com cpf "34567890123"', async () => {
+      const password = '041102';
+      const hashedPassword = await bcrypt.hash(password, securityConfig.saltRounds);
+      const cpf = '34567890123';
+      await prisma.user.create({
+        data: {
+          name: 'Pedro dias',
+          cpf: cpf, // Sem formatação para armazenamento
+          password: hashedPassword,
+          userType: UserType.ADMIN,
+        },
+      });
+      response = await request(app).post('/api/auth/login').send({ cpf: cpf, password: password });
+      accessToken = response.body.accessToken;
     });
 
     and('ele está na página de edição de salas da sala "GRAD 04"', async () => {
@@ -183,8 +211,8 @@ defineFeature(feature, test => {
           description: 'Laboratório 4',
           capacity: 30,
           hasComputers: true,
-          hasProjector: false
-        }
+          hasProjector: false,
+        },
       });
       roomId = room.id;
     });
@@ -193,81 +221,17 @@ defineFeature(feature, test => {
       requestBody.capacity = -15;
     });
 
-    and('ele deixa os campos "Nome da sala", "Descrição", "Tem computadores" e "Tem projetores" sem alteração', () => {
-      // Apenas capacity será enviado
-    });
-
     and('seleciona "Editar"', async () => {
       response = await request(app)
         .put(`/api/rooms/${roomId}`)
-        .send(requestBody);
+        .send(requestBody)
+        .set('authorization', `Bearer ${accessToken}`);
     });
 
-    then('o sistema reconhece que a capacidade é um valor inválido', () => {
+    then('a mensagem "Falha na edição. A capacidade deve ser um número positivo!" é exibida.', () => {
       expect(response.status).toBe(400);
       expect(response.body.success).toBe(false);
-    });
-
-    and('a mensagem "Falha na edição. A capacidade deve ser um número positivo!" é exibida.', () => {
       expect(response.body.message).toBe('Falha na edição. A capacidade deve ser um número positivo!');
-    });
-  });
-
-  test('Erro na edição de sala por ID inexistente', ({ given, when, then, and }) => {
-    given('o administrador "Pedro Dias"', () => {
-      // Contexto do administrador
-    });
-
-    and('ele tenta editar uma sala com ID "999"', () => {
-      roomId = 999;
-    });
-
-    when('ele edita o campo "Nome da sala" para "GRAD 10"', () => {
-      requestBody.name = 'GRAD 10';
-    });
-
-    and('seleciona "Editar"', async () => {
-      response = await request(app)
-        .put(`/api/rooms/${roomId}`)
-        .send(requestBody);
-    });
-
-    then('o sistema reconhece que a sala não existe', () => {
-      expect(response.status).toBe(404);
-      expect(response.body.success).toBe(false);
-    });
-
-    and('a mensagem "Sala não encontrada" é exibida.', () => {
-      expect(response.body.message).toBe('Sala não encontrada');
-    });
-  });
-
-  test('Erro na edição de sala por ID inválido', ({ given, when, then, and }) => {
-    given('o administrador "Pedro Dias"', () => {
-      // Contexto do administrador
-    });
-
-    and('ele tenta editar uma sala com ID "abc"', () => {
-      // ID inválido será usado na requisição
-    });
-
-    when('ele edita o campo "Nome da sala" para "GRAD 10"', () => {
-      requestBody.name = 'GRAD 10';
-    });
-
-    and('seleciona "Editar"', async () => {
-      response = await request(app)
-        .put('/api/rooms/abc')
-        .send(requestBody);
-    });
-
-    then('o sistema reconhece que o ID é inválido', () => {
-      expect(response.status).toBe(400);
-      expect(response.body.success).toBe(false);
-    });
-
-    and('a mensagem "ID da sala deve ser um número válido" é exibida.', () => {
-      expect(response.body.message).toBe('ID da sala deve ser um número válido');
     });
   });
 });

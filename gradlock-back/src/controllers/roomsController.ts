@@ -1,6 +1,13 @@
 import { Request, Response } from 'express';
 import prisma from '../config/prismaClient';
 
+// Função helper para criar data de forma consistente
+const createTodayDate = (): Date => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return today;
+};
+
 export class RoomsController {
   static async getAllRooms(_req: Request, res: Response): Promise<void> {
     try {
@@ -8,15 +15,21 @@ export class RoomsController {
         orderBy: {
           name: 'asc',
         },
-        select: {
-          id: true,
-          name: true,
-          description: true,
-          capacity: true,
-          hasComputers: true,
-          hasProjector: true,
-          createdAt: true,
-          updatedAt: true,
+        include: {
+          reservations: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  name: true,
+                  userType: true,
+                },
+              },
+            },
+            orderBy: {
+              date: 'desc',
+            },
+          },
         },
       });
 
@@ -94,6 +107,7 @@ export class RoomsController {
       });
     }
   }
+  
   static async createRoom(req: Request, res: Response): Promise<void> {
     try {
       const { name, description, capacity, hasComputers, hasProjector } = req.body;
@@ -306,29 +320,34 @@ export class RoomsController {
         return;
       }
 
-      // Verificar se há reservas ativas para esta sala
-      const activeReservations = await prisma.reservation.findMany({
+      // Verificar se há reservas que impedem a exclusão (aprovadas ou pendentes)
+      const today = createTodayDate();
+      
+      const blockingReservations = await prisma.reservation.findMany({
         where: {
           roomId: roomId,
           date: {
-            gte: new Date(), // Reservas futuras ou de hoje
+            gte: today, // Reservas futuras ou de hoje
+          },
+          status: {
+            in: ['PENDING', 'APPROVED'], // Apenas reservas pendentes ou aprovadas bloqueiam a exclusão
           },
         },
       });
 
-      if (activeReservations.length > 0) {
+      if (blockingReservations.length > 0) {
         res.status(409).json({
           success: false,
           message:
             'Não é possível deletar a sala. Existem reservas ativas ou futuras para esta sala',
           data: {
-            activeReservations: activeReservations.length,
+            activeReservations: blockingReservations.length,
           },
         });
         return;
       }
 
-      // Deletar a sala (as reservas passadas serão deletadas em cascata)
+      // Deletar a sala (as reservas passadas e rejeitadas serão deletadas em cascata)
       await prisma.room.delete({
         where: { id: roomId },
       });

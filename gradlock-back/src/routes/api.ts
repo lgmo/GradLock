@@ -1,13 +1,16 @@
 import express from 'express';
-import { RoomsController } from '../controllers/roomsController';
+import authRoutes from './modules/auth-routes';
+import userRoutes from './modules/user-routes';
+import roomRoutes from './modules/room-routes';
+import reservationRouter from './modules/reservation-routes';
 
 const apiRouter = express.Router();
 
-// Rotas de salas
-apiRouter.get('/rooms', RoomsController.getAllRooms);
-apiRouter.get('/rooms/:id', RoomsController.getRoomById);
-apiRouter.post('/rooms', RoomsController.createRoom);
-apiRouter.put('/rooms/:id', RoomsController.updateRoom);
-apiRouter.delete('/rooms/:id', RoomsController.deleteRoom);
+// Montagem das rotas organizadas por domínio
+apiRouter.use('/auth', authRoutes);
+apiRouter.use('/users', userRoutes);
+apiRouter.use('/rooms', roomRoutes);
+apiRouter.use('/reservations', reservationRouter);
 
 export default apiRouter;
+  
