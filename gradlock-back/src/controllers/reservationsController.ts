@@ -3,6 +3,13 @@ import prisma from '../config/prismaClient';
 import { AuthenticatedRequest } from '../types/auth';
 import { ReservationStatus } from 'generated/prisma';
 
+// Função helper para criar data de forma consistente
+const createDateFromString = (dateString: string): Date => {
+  // Cria uma data no horário local (evita problemas de UTC)
+  const [year, month, day] = dateString.split('-');
+  return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+};
+
 export class ReservationsController {
   static async getAllReservations(_req: Request, res: Response): Promise<void> {
     try {
@@ -131,11 +138,12 @@ export class ReservationsController {
 
       if (date) {
         // Para filtrar por um dia inteiro, criamos um intervalo do início ao fim do dia.
-        const selectedDate = new Date(date as string);
-        selectedDate.setUTCHours(0, 0, 0, 0);
+        // Usamos a função helper para garantir consistência
+        const selectedDate = createDateFromString(date as string);
+        selectedDate.setHours(0, 0, 0, 0);
 
         const nextDay = new Date(selectedDate);
-        nextDay.setUTCDate(nextDay.getUTCDate() + 1);
+        nextDay.setDate(nextDay.getDate() + 1);
 
         where.date = {
           gte: selectedDate,
@@ -207,11 +215,13 @@ export class ReservationsController {
       }
 
       // Verificar se a reserva já existe
+      const reservationDate = createDateFromString(date.trim());
+      
       const existingReservation = await prisma.reservation.findUnique({
           where: {
             roomId_date_startTime: {
               roomId: roomId,
-              date: date.trim(),
+              date: reservationDate,
               startTime: startTime.trim(),
             },
           },
@@ -230,7 +240,7 @@ export class ReservationsController {
         data: {
           userId: userId,
           roomId: roomId,
-          date: date.trim(),
+          date: reservationDate,
           startTime: startTime.trim(),
           endTime: endTime.trim(),
           reason: reason.trim(),

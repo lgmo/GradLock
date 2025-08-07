@@ -1,6 +1,13 @@
 import { Request, Response } from 'express';
 import prisma from '../config/prismaClient';
 
+// Função helper para criar data de forma consistente
+const createTodayDate = (): Date => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return today;
+};
+
 export class RoomsController {
   static async getAllRooms(_req: Request, res: Response): Promise<void> {
     try {
@@ -314,11 +321,13 @@ export class RoomsController {
       }
 
       // Verificar se há reservas que impedem a exclusão (aprovadas ou pendentes)
+      const today = createTodayDate();
+      
       const blockingReservations = await prisma.reservation.findMany({
         where: {
           roomId: roomId,
           date: {
-            gte: new Date(), // Reservas futuras ou de hoje
+            gte: today, // Reservas futuras ou de hoje
           },
           status: {
             in: ['PENDING', 'APPROVED'], // Apenas reservas pendentes ou aprovadas bloqueiam a exclusão
@@ -332,7 +341,7 @@ export class RoomsController {
           message:
             'Não é possível deletar a sala. Existem reservas ativas ou futuras para esta sala',
           data: {
-            blockingReservations: blockingReservations.length,
+            activeReservations: blockingReservations.length,
           },
         });
         return;
