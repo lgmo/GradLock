@@ -23,7 +23,7 @@ async function main() {
     create: {
       cpf: '23456789012',
       name: 'Breno Miranda da Silva',
-      password: '310590',
+      password: await bcrypt.hash('310590', 10), // Em produção, isso deve ser hasheado
       userType: UserType.TEACHER,
     },
   });
@@ -35,7 +35,7 @@ async function main() {
     create: {
       cpf: '34567890123',
       name: 'Maria Fernanda dos Santos',
-      password: '041102',
+      password: await bcrypt.hash('041102', 10), // Em produção, isso deve ser hasheado
       userType: UserType.STUDENT,
       course: 'Ciência da Computação',
       enrollment: '2021234567',
