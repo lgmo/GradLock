@@ -2,10 +2,16 @@ import { z } from 'zod';
 
 export const authCredentialsSchema = z.object({
   cpf: z
-    .string()
-    .length(11, { message: 'CPF deve conter exatamente 11 dígitos' })
-    .regex(/^\d+$/, { message: 'CPF deve conter apenas números' }),
-  password: z.string().min(6, { message: 'Senha deve ter pelo menos 6 caracteres' }),
+    .string({
+      required_error: 'cpf é obrigatório',
+      invalid_type_error: 'cpf deve ser uma string',
+    })
+    .length(11, { message: 'cpf deve conter exatamente 11 dígitos' })
+    .regex(/^\d*$/, { message: 'cpf deve conter apenas números' }),
+  password: z.string({
+      required_error: 'password é obrigatório',
+      invalid_type_error: 'password deve ser uma string',
+    }).min(6, { message: 'password deve ter pelo menos 6 caracteres' }),
 });
 
 export const refreshTokenSchema = z.object({

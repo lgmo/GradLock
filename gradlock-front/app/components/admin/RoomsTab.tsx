@@ -6,7 +6,6 @@ import {
     Button,
     Alert,
     CircularProgress,
-    Container,
     Snackbar,
     Dialog,
     DialogTitle,
@@ -16,13 +15,12 @@ import {
 } from '@mui/material';
 import { Add as AddIcon } from '@mui/icons-material';
 import { useState, useEffect } from 'react';
-import { Room, CreateRoomData, UpdateRoomData } from '../types/room';
-import { RoomService } from '../api/services/roomService';
-import RoomCard from '../components/admin/RoomCard';
-import RoomModal from '../components/admin/RoomModal';
-import Logo from '../components/ui/Logo';
+import { Room, CreateRoomData, UpdateRoomData } from '../../types/room';
+import { RoomService } from '../../api/services/roomService';
+import RoomCard from './RoomCard';
+import RoomModal from './RoomModal';
 
-export default function AdminPage() {
+export default function RoomsTab() {
     const [rooms, setRooms] = useState<Room[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -138,7 +136,7 @@ export default function AdminPage() {
                 display="flex"
                 justifyContent="center"
                 alignItems="center"
-                minHeight="100vh"
+                minHeight="400px"
             >
                 <CircularProgress />
                 <Typography variant="h6" sx={{ ml: 2 }}>
@@ -150,80 +148,106 @@ export default function AdminPage() {
 
     if (error) {
         return (
-            <Container maxWidth="md" sx={{ mt: 4 }}>
+            <Box>
                 <Alert severity="error" sx={{ mb: 2 }}>
                     {error}
                 </Alert>
                 <Button variant="contained" onClick={loadRooms}>
                     Tentar Novamente
                 </Button>
-            </Container>
+            </Box>
         );
     }
 
     return (
-        <>
-            <Logo />
-            <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+        <Box sx={{ pt: 2 }}>
+            <Box
+                display="flex"
+                justifyContent="space-between"
+                alignItems="center"
+                mb={3}
+                flexDirection={{ xs: 'column', sm: 'row' }}
+                gap={{ xs: 2, sm: 0 }}
+            >
+                <Typography
+                    variant="h5"
+                    component="h2"
+                    fontWeight="bold"
+                    sx={{ color: '#4C56F8' }}
+                >
+                    Gerenciar Salas
+                </Typography>
+                <Button
+                    variant="contained"
+                    startIcon={<AddIcon />}
+                    onClick={handleCreateRoom}
+                    size="large"
+                >
+                    Nova Sala
+                </Button>
+            </Box>
+
+            {rooms.length === 0 ? (
                 <Box
                     display="flex"
-                    justifyContent="space-between"
+                    flexDirection="column"
                     alignItems="center"
-                    mb={4}
+                    justifyContent="center"
+                    py={8}
                 >
                     <Typography
-                        variant="h4"
-                        component="h1"
-                        fontWeight="bold"
-                        sx={{ color: '#4C56F8' }}
+                        variant="h6"
+                        color="text.secondary"
+                        gutterBottom
                     >
-                        Gerenciar Salas
+                        Nenhuma sala cadastrada
+                    </Typography>
+                    <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        mb={3}
+                    >
+                        Clique em "Nova Sala" para adicionar a primeira sala
                     </Typography>
                     <Button
                         variant="contained"
                         startIcon={<AddIcon />}
                         onClick={handleCreateRoom}
-                        size="large"
                     >
-                        Nova Sala
+                        Criar Primeira Sala
                     </Button>
                 </Box>
-
-                {rooms.length === 0 ? (
-                    <Box
-                        display="flex"
-                        flexDirection="column"
-                        alignItems="center"
-                        justifyContent="center"
-                        py={8}
-                    >
-                        <Typography
-                            variant="h6"
-                            color="text.secondary"
-                            gutterBottom
-                        >
-                            Nenhuma sala cadastrada
-                        </Typography>
-                        <Typography
-                            variant="body2"
-                            color="text.secondary"
-                            mb={3}
-                        >
-                            Clique em "Nova Sala" para adicionar a primeira sala
-                        </Typography>
-                        <Button
-                            variant="contained"
-                            startIcon={<AddIcon />}
-                            onClick={handleCreateRoom}
-                        >
-                            Criar Primeira Sala
-                        </Button>
-                    </Box>
-                ) : (
+            ) : (
+                <Box
+                    sx={{
+                        maxHeight: 'calc(100vh - 300px)', // Altura máxima baseada na viewport
+                        overflowY: 'auto',
+                        overflowX: 'hidden',
+                        pr: 1, // Padding right para evitar que o scroll cubra o conteúdo
+                        '&::-webkit-scrollbar': {
+                            width: '8px',
+                        },
+                        '&::-webkit-scrollbar-track': {
+                            background: '#f1f1f1',
+                            borderRadius: '4px',
+                        },
+                        '&::-webkit-scrollbar-thumb': {
+                            background: '#c1c1c1',
+                            borderRadius: '4px',
+                            '&:hover': {
+                                background: '#a8a8a8',
+                            },
+                        },
+                    }}
+                >
                     <Box
                         display="grid"
-                        gridTemplateColumns="repeat(auto-fill, minmax(350px, 1fr))"
+                        gridTemplateColumns={{
+                            xs: '1fr',
+                            sm: 'repeat(auto-fill, minmax(350px, 1fr))',
+                        }}
                         gap={3}
+                        pb={2} // Padding bottom para dar espaço no final
                     >
                         {rooms.map((room) => (
                             <RoomCard
@@ -234,58 +258,58 @@ export default function AdminPage() {
                             />
                         ))}
                     </Box>
-                )}
+                </Box>
+            )}
 
-                {/* Modal para criar/editar sala */}
-                <RoomModal
-                    open={modalOpen}
-                    onClose={() => setModalOpen(false)}
-                    onSave={handleSaveRoom}
-                    room={selectedRoom}
-                    mode={modalMode}
-                />
+            {/* Modal para criar/editar sala */}
+            <RoomModal
+                open={modalOpen}
+                onClose={() => setModalOpen(false)}
+                onSave={handleSaveRoom}
+                room={selectedRoom}
+                mode={modalMode}
+            />
 
-                {/* Dialog de confirmação para deletar */}
-                <Dialog
-                    open={deleteDialogOpen}
-                    onClose={() => setDeleteDialogOpen(false)}
-                >
-                    <DialogTitle>Confirmar Exclusão</DialogTitle>
-                    <DialogContent>
-                        <DialogContentText>
-                            Tem certeza que deseja deletar esta sala? Esta ação
-                            não pode ser desfeita.
-                        </DialogContentText>
-                    </DialogContent>
-                    <DialogActions>
-                        <Button onClick={() => setDeleteDialogOpen(false)}>
-                            Cancelar
-                        </Button>
-                        <Button
-                            onClick={confirmDelete}
-                            color="error"
-                            variant="contained"
-                        >
-                            Deletar
-                        </Button>
-                    </DialogActions>
-                </Dialog>
-
-                {/* Snackbar para feedback */}
-                <Snackbar
-                    open={snackbar.open}
-                    autoHideDuration={4000}
-                    onClose={handleCloseSnackbar}
-                >
-                    <Alert
-                        onClose={handleCloseSnackbar}
-                        severity={snackbar.severity}
-                        variant="filled"
+            {/* Dialog de confirmação para deletar */}
+            <Dialog
+                open={deleteDialogOpen}
+                onClose={() => setDeleteDialogOpen(false)}
+            >
+                <DialogTitle>Confirmar Exclusão</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>
+                        Tem certeza que deseja deletar esta sala? Esta ação
+                        não pode ser desfeita.
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setDeleteDialogOpen(false)}>
+                        Cancelar
+                    </Button>
+                    <Button
+                        onClick={confirmDelete}
+                        color="error"
+                        variant="contained"
                     >
-                        {snackbar.message}
-                    </Alert>
-                </Snackbar>
-            </Container>
-        </>
+                        Deletar
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Snackbar para feedback */}
+            <Snackbar
+                open={snackbar.open}
+                autoHideDuration={4000}
+                onClose={handleCloseSnackbar}
+            >
+                <Alert
+                    onClose={handleCloseSnackbar}
+                    severity={snackbar.severity}
+                    variant="filled"
+                >
+                    {snackbar.message}
+                </Alert>
+            </Snackbar>
+        </Box>
     );
 }

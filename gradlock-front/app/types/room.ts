@@ -1,3 +1,5 @@
+import { Reservation } from './reservation';
+
 export interface Room {
   id: number;
   name: string;
@@ -7,6 +9,11 @@ export interface Room {
   hasProjector: boolean;
   createdAt: string;
   updatedAt: string;
+  reservations?: Reservation[];
+}
+
+export interface RoomWithReservations extends Room {
+  reservations: Reservation[];
 }
 
 export interface CreateRoomData {
