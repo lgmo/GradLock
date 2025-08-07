@@ -1,8 +1,8 @@
 'use client';
 
 import { Container, Box, Typography, Paper } from '@mui/material';
-import ReservationCard from '../components/admin/ReservationCard';
-import Logo from '../components/ui/Logo';
+import ReservationCard from '../../components/admin/ReservationCard';
+import Logo from '../../components/ui/Logo';
 
 export default function UserPage() {
   return (
