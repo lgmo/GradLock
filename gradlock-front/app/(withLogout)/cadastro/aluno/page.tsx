@@ -11,20 +11,11 @@ import {
 import Logo from '@/components/ui/Logo';
 import AuthCard from '@/components/auth/AuthCard';
 import AuthButton from '@/components/auth/AuthButton';
-import { grey } from '@mui/material/colors';
-import { useEffect, useState } from 'react';
-import { AuthService } from './api/services/authService';
-import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { AuthService } from '@/api/services/authService';
+import { UserService } from '@/api/services/userService';
 
-export default function Home() {
-    const router = useRouter();
-
-  useEffect(() => {
-    const token = localStorage.getItem('accessToken');
-    if (token) {
-      router.push('/admin');
-    }
-  }, [router]);
+export default function RegisterStudent() {
     type SnackbarState = {
         open: boolean;
         message: string;
@@ -77,11 +68,14 @@ export default function Home() {
     const { snackbar, showSnackbar, closeSnackbar } = useSnackbar();
     const [cpf, setCpf] = useState('');
     const [password, setPassword] = useState('');
+    const [name, setName] = useState('');
+    const [enrollment, setEnrollment] = useState('');
+    const [course, setCourse] = useState('');
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
         try {
-            if (!cpf || !password) {
+            if (!cpf || !password || !name) {
                 showSnackbar('Preencha todos os campos!', 'error');
                 return;
             }
@@ -92,23 +86,26 @@ export default function Home() {
                 return;
             }
 
-            const { accessToken, refreshToken, expiresIn } =
-                await AuthService.login(parsedCpf, password);
+            await UserService.create({
+                cpf,
+                password,
+                name,
+                userType: 'STUDENT',
+                enrollment,
+                course,
+            });
 
-            localStorage.setItem('accessToken', accessToken);
-            localStorage.setItem('tokenExpiresIn', expiresIn.toString());
-            localStorage.setItem('refreshToken', refreshToken);
-
-            showSnackbar('Login realizado com sucesso!', 'success');
+            showSnackbar('Usuário criado com sucesso!', 'success');
 
             setTimeout(() => {
-                window.location.href = '/admin';
+                window.location.href = '/';
             }, 2000);
         } catch (err) {
             const error = err as { message?: string };
-            showSnackbar(error?.message || 'Erro ao realizar login!', 'error');
+            showSnackbar(error?.message || 'Erro ao fazer cadastro!', 'error');
         }
     }
+
 
     return (
         <Box
@@ -159,7 +156,14 @@ export default function Home() {
                         />
 
                         <TextField
-                            id="user-password"
+                            variant="outlined"
+                            size="small"
+                            label="Nome"
+                            fullWidth
+                            onChange={(e) => setName(e.target.value)}
+                        />
+
+                        <TextField
                             variant="outlined"
                             size="small"
                             label="Senha"
@@ -168,27 +172,23 @@ export default function Home() {
                             onChange={(e) => setPassword(e.target.value)}
                         />
 
-                        <AuthButton type="submit">Entrar</AuthButton>
+                        <TextField
+                            variant="outlined"
+                            size="small"
+                            label="Matricula"
+                            fullWidth
+                            onChange={(e) => setEnrollment(e.target.value)}
+                        />
 
-                        <AuthButton
-                            backgroundColor={grey[700]}
-                            hoverColor={grey[900]}
-                            onClick={() => {
-                                window.location.href = '/cadastro/aluno';
-                            }}
-                        >
-                            Cadastrar Aluno
-                        </AuthButton>
+                        <TextField
+                            variant="outlined"
+                            size="small"
+                            label="Curso"
+                            fullWidth
+                            onChange={(e) => setCourse(e.target.value)}
+                        />
 
-                        <AuthButton
-                            backgroundColor={grey[700]}
-                            hoverColor={grey[900]}
-                            onClick={() => {
-                                window.location.href = '/cadastro/professor';
-                            }}
-                        >
-                            Cadastrar Professor
-                        </AuthButton>
+                        <AuthButton type="submit">Cadastrar</AuthButton>
                     </Box>
                 </AuthCard>
             </Box>

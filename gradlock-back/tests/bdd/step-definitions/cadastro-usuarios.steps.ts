@@ -1,245 +1,192 @@
 import { defineFeature, loadFeature } from 'jest-cucumber';
+import bcrypt from 'bcrypt';
 import request from 'supertest';
 import app from '../../../src/app';
 import prisma from '../../../src/config/prismaClient';
+import { securityConfig } from '../../../src/config/baseConfig';
 import { UserType } from '../../../generated/prisma';
 
-const feature = loadFeature('../features/cadastro_usuarios.feature');
+const feature = loadFeature('../features/cadastro_usuarios_servico.feature');
 
 defineFeature(feature, (test) => {
-  let response: any;
+  let response: request.Response;
   let requestBody: any;
 
   beforeEach(async () => {
-    // Limpar dados antes de cada teste
     await prisma.user.deleteMany();
-
-    // Reset variables
-    response = null;
+    response = {} as request.Response;
     requestBody = {};
   });
 
-  test('Cadastro de aluno com sucesso', ({ given, and, when, then }) => {
-    given('o aluno "João Pedro"', () => {
-      // Contexto do aluno
+  test('Cadastro válido de estudante', ({ given, when, then, and }) => {
+    given('um usuário não cadastrado com CPF "12345678901"', async () => {
+      await prisma.user.deleteMany({ where: { cpf: '12345678901' } });
     });
 
-    and('ele não possui cadastro prévio', async () => {
-      // Verificar que não existe no banco (já garantido pelo beforeEach)
-    });
-
-    and('ele está na página de cadastro', () => {
-      // Contexto da página de cadastro
-    });
-
-    when('ele preenche o campo "Nome Completo" com "João Pedro da Silva"', () => {
-      requestBody.name = 'João Pedro da Silva';
-    });
-
-    and('seleciona "Tipo de vínculo" como "Discente"', () => {
-      requestBody.userType = UserType.STUDENT;
-    });
-
-    and('a página exibe os campos "Curso" e "Matrícula"', () => {
-      // Contexto da UI (não precisa de ação)
-    });
-
-    and('ele preenche o campo "Curso" com "Ciência da Computação"', () => {
-      requestBody.course = 'Ciência da Computação';
-    });
-
-    and('ele preenche o campo "Matrícula" com "2021234567"', () => {
-      requestBody.enrollment = '2021234567';
-    });
-
-    and('ele preenche o campo "CPF" com "123.456.789-01"', () => {
-      requestBody.cpf = '12345678901';
-    });
-
-    and('ele preenche o campo "Senha" com "020301"', () => {
-      requestBody.password = '020301';
-    });
-
-    and('clica em "Cadastrar"', async () => {
+    when('é enviada uma requisição POST para "/api/users" com payload:', async (docString) => {
+      requestBody = JSON.parse(docString);
       response = await request(app).post('/api/users').send(requestBody);
     });
 
-    then(
-      'o sistema cadastra uma nova conta de usuário como "Discente" com as informações dadas',
-      async () => {
-        expect(response.status).toBe(201);
-        expect(response.body.success).toBe(true);
-
-        // Verificar se foi salvo no banco
-        const userInDb = await prisma.user.findUnique({
-          where: { cpf: '12345678901' }, // CPF sem formatação
-        });
-
-        expect(userInDb).not.toBeNull();
-        expect(userInDb!.name).toBe('João Pedro da Silva');
-        expect(userInDb!.userType).toBe(UserType.STUDENT);
-        expect(userInDb!.course).toBe('Ciência da Computação');
-        expect(userInDb!.enrollment).toBe('2021234567');
-      },
-    );
-
-    and('uma mensagem de sucesso "Cadastro realizado com sucesso!" é exibida', () => {
-      // Mensagem de cadastro realizado
+    then('o sistema deve retornar status 201', () => {
+      expect(response.status).toBe(201);
     });
 
-    and('o usuário "João Silva" pode realizar login.', async () => {
-      const loginResponse = await request(app).post('/api/auth/login').send({
-        cpf: '12345678901',
-        password: '020301',
-      });
+    and('a resposta deve conter um ID de usuário gerado', async () => {
+      expect(response.body.id).toBeDefined();
+      expect(typeof response.body.id).toBe("number");
+      const user = await prisma.user.findUnique({ where: { cpf: '12345678901' } })
+      expect(user?.id !== null).toBeTruthy();
+      expect(user?.id === response.body.id).toBeTruthy();
+    });
 
-      expect(loginResponse.status).toBe(200);
-      expect(loginResponse.body.success).toBe(true);
+    and('a resposta deve ter o seguinte payload no formato JSON:', (docString) => {
+      const expected = JSON.parse(docString);
+      expect(response.body).toMatchObject({
+        name: expected.name,
+        userType: expected.userType,
+        course: expected.course,
+        enrollment: expected.enrollment,
+        cpf: expected.cpf,
+      });
+    });
+
+    and('<user> deve não ser null', async () => {
+      const user = await prisma.user.findUnique({ where: { cpf: requestBody.cpf } });
+      expect(user).not.toBeNull();
+    });
+
+    and('o banco de dados deve conter o usuário como "STUDENT"', async () => {
+      const user = await prisma.user.findUnique({ where: { cpf: requestBody.cpf } });
+      expect(user?.userType).toBe(UserType.STUDENT);
+      
     });
   });
 
-  test('Cadastro de professor com sucesso', ({ given, and, when, then }) => {
-    given('o professor "Breno Miranda"', () => {
-      // Contexto do professor
+  test('Cadastro válido de professor', ({ given, when, then, and }) => {
+    given('um usuário não cadastrado com CPF "23456789012"', async () => {
+      await prisma.user.deleteMany({ where: { cpf: '23456789012' } });
     });
 
-    and('ele não possui cadastro prévio', () => {
-      // Já garantido pelo beforeEach
-    });
-
-    and('ele está na página de cadastro', () => {
-      // Contexto da página
-    });
-
-    when('ele preenche o campo "Nome Completo" com "Breno Miranda da Silva"', () => {
-      requestBody.name = 'Breno Miranda da Silva';
-    });
-
-    and('seleciona "Tipo de vínculo" como "Docente"', () => {
-      requestBody.userType = UserType.TEACHER;
-    });
-
-    and('a página não exibe os campos "Curso" e "Matrícula"', () => {
-      // Contexto da UI (não precisa de ação)
-    });
-
-    and('ele preenche o campo "CPF" com "234.567.890-12"', () => {
-      requestBody.cpf = '23456789012';
-    });
-
-    and('ele preenche o campo "Senha" com "310590"', () => {
-      requestBody.password = '310590';
-    });
-
-    and('clica em "Cadastrar"', async () => {
+    when('é enviada uma requisição POST para "/api/users" com payload:', async (docString) => {
+      requestBody = JSON.parse(docString);
       response = await request(app).post('/api/users').send(requestBody);
     });
 
-    then(
-      'o sistema cadastra uma nova conta de usuário como "Docente" com as informações dadas',
-      async () => {
-        expect(response.status).toBe(201);
-
-        const userInDb = await prisma.user.findUnique({
-          where: { cpf: '23456789012' },
-        });
-
-        expect(userInDb).not.toBeNull();
-        expect(userInDb!.userType).toBe(UserType.TEACHER);
-        expect(userInDb!.course).toBeNull(); // Docente não tem curso
-        expect(userInDb!.enrollment).toBeNull(); // Docente não tem matrícula
-      },
-    );
-
-    and('uma mensagem de sucesso "Cadastro realizado com sucesso!" é exibida', () => {
-      // Mensagem de cadastro realizado
+    then('o sistema deve retornar status 201', () => {
+      expect(response.status).toBe(201);
     });
 
-    and('o usuário "Breno Miranda" com CPF "234.567.890-12" pode realizar login.', async () => {
-      const loginResponse = await request(app).post('/api/auth/login').send({
-        cpf: '23456789012',
-        password: '310590',
+    and('a resposta deve ter o seguinte payload no formato JSON:', async (docString) => {
+      const expected = JSON.parse(docString);
+      expect(response.body).toMatchObject({
+        name: expected.name,
+        userType: expected.userType,
+        cpf: expected.cpf,
       });
-      expect(loginResponse.status).toBe(200);
+      expect(response.body.id).toBeDefined();
+      expect(typeof response.body.id).toBe('number');
+      const user = await prisma.user.findUnique({ where: { cpf: '23456789012' } })
+      expect(user?.id !== null).toBeTruthy();
+      expect(user?.id === response.body.id).toBeTruthy();
+    });
+
+    and('o campo "id" da resposta deve estar presenter', () => {
+      expect(response.body.id).toBeDefined();
+    });
+
+    and('o campo "id" da resposta não pode ser nulo', () => {
+      expect(response.body.id).not.toBeNull();
     });
   });
 
-  test('Cadastro inválido com campo não preenchido', ({ given, when, then, and }) => {
-    given('o aluno "João Felipe"', () => {
-      // Contexto do aluno
+  test('Tentativa de cadastro com campos obrigatórios faltantes', ({ given, when, then, and }) => {
+    given('um CPF não cadastrado "34567890123"', async () => {
+      await prisma.user.deleteMany({ where: { cpf: '34567890123' } });
     });
 
-    and('ele está na página de cadastro', () => {
-      // Contexto da página
-    });
-
-    when('ele não preenche um dos campos do cadastro', () => {
-      requestBody = {
-        name: 'João Felipe',
-        userType: UserType.STUDENT,
-        // Campos obrigatórios faltando: CPF, senha, etc.
-      };
-    });
-
-    and('clica em "Cadastrar"', async () => {
+    when('é enviada uma requisição POST para "/api/users" com payload:', async (docString) => {
+      requestBody = JSON.parse(docString);
       response = await request(app).post('/api/users').send(requestBody);
     });
 
-    then('o sistema identifica a ausência de um dos campos', () => {
+    then('o sistema deve retornar status 400', () => {
       expect(response.status).toBe(400);
     });
 
-    and(
-      'uma mensagem de fracasso "Cadastro não realizado. Todos os campos devem ser preenchidos!" é exibida.',
-      () => {
-        // Mensagem de falha no cadastro
-      },
-    );
+    and('o campo "status" da resposta deve ser "fail"', () => {
+      expect(response.body.status).toBe('fail');
+    });
+
+    and('o campo "success" da resposta deve ser false', () => {
+      expect(response.body.success).toBe(false);
+    });
+
+    and('o campo "message" da resposta deve conter "password é obrigatório"', () => {
+      expect(response.body.message).toEqual(expect.stringContaining('password é obrigatório'));
+    });
+
+    and('o campo "message" da resposta deve conter "course é obrigatório"', () => {
+      expect(response.body.message).toEqual(expect.stringContaining('course é obrigatório'));
+    });
+
+    and('o campo "message" da resposta deve conter "enrollment é obrigatório"', () => {
+      expect(response.body.message).toEqual(expect.stringContaining('enrollment é obrigatório'));
+    });
   });
 
-  test('Cadastro inválido com usuário já existente', ({ given, and, when, then }) => {
-    given('o professor "Paulo Borba"', async () => {
-      // Criar usuário existente
+  test('Tentativa de cadastro com usuário já existente', ({ given, when, then, and }) => {
+    given('um usuário já cadastrado com CPF "45678901234"', async () => {
+      const hashedPassword = await bcrypt.hash('password123', securityConfig.saltRounds);
       await prisma.user.create({
         data: {
           name: 'Paulo Borba',
-          cpf: '34567890123',
-          password: 'existingPassword',
+          cpf: '45678901234',
+          password: hashedPassword,
           userType: UserType.TEACHER,
         },
       });
     });
 
-    and('ele já possui cadastro prévio', () => {
-      // Já tratado no given anterior
-    });
-
-    and('ele está na página de cadastro', () => {
-      // Contexto da página
-    });
-
-    when('ele preenche todos os campos do cadastro', () => {
-      requestBody = {
-        name: 'Paulo Borba',
-        userType: UserType.TEACHER,
-        cpf: '34567890123', // CPF já existente
-        password: 'newPassword',
-      };
-    });
-
-    and('clica em "Cadastrar"', async () => {
+    when('é enviada uma requisição POST para "/api/users" com payload:', async (docString) => {
+      requestBody = JSON.parse(docString);
       response = await request(app).post('/api/users').send(requestBody);
     });
 
-    then('o sistema identifica uma conta já existente com o "CPF" informado', () => {
+    then('o sistema deve retornar status 409', () => {
       expect(response.status).toBe(409);
     });
 
-    and(
-      'uma mensagem de fracasso "Cadastro não realizado. Esse usuário já foi cadastrado!" é exibida.',
-      () => {
-        // Mensagem de usuário já cadastrado
-      },
-    );
+    and('a resposta deve ter o seguinte payload no formato JSON:', (docString) => {
+      const expected = JSON.parse(docString);
+      expect(response.body).toEqual({
+        status: expected.status,
+        message: expect.stringContaining(`User with cpf ${requestBody.cpf} already exists`),
+        success: expected.success,
+      });
+    });
+  });
+
+  test('Tentativa de cadastro com CPF inválido', ({ when, then, and }) => {
+    when('é enviada uma requisição POST para "/api/users" com payload:', async (docString) => {
+      requestBody = JSON.parse(docString);
+      response = await request(app).post('/api/users').send(requestBody);
+    });
+
+    then('o sistema deve retornar status 400', () => {
+      expect(response.status).toBe(400);
+    });
+
+    and('o campo "status" da resposta deve ser "fail"', () => {
+      expect(response.body.status).toBe("fail")
+    });
+
+    and('o campo "success" da resposta deve ser false', () => {
+      expect(response.body.success).toBeFalsy()
+    });
+
+    and('o campo "message" da resposta deve conter "cpf: CPF deve conter exatamente 11 dígitos"', () => {
+      expect(response.body.message).toEqual(expect.stringContaining('cpf: CPF deve conter exatamente 11 dígitos'));
+    });
   });
 });
